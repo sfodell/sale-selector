@@ -6,6 +6,8 @@ plugins {
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
 }
 
+val mapsApiKey: String = project.findProperty("MAPS_API_KEY") as String? ?: ""
+
 android {
     namespace = "com.cs407.saleselector"
     compileSdk = 36
@@ -18,6 +20,8 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        manifestPlaceholders["MAPS_API_KEY"] = mapsApiKey
+
     }
 
     buildTypes {
@@ -64,4 +68,5 @@ dependencies {
     val mapsComposeVersion = "4.4.1"
     implementation("com.google.maps.android:maps-compose:$mapsComposeVersion")
     implementation("com.google.android.gms:play-services-maps:19.0.0")
+    implementation("com.google.code.gson:gson:2.10.1")
 }
