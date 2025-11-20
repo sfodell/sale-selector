@@ -1,3 +1,29 @@
 <resources>
     <string name="app_name">Sale Selector</string>
+
+
+    <!-- Friends Screen -->
+    <string name="friends_screen_title">My Friends</string>
+    <string name="status_online">online</string>
+    <string name="status_offline">offline</string>
+    <string name="add_friends_header">Add Friends</string>
+    <string name="search_placeholder">search by name</string>
+    <string name="btn_search">Search</string>
+    <string name="cd_back_arrow">Back</string>
+
+    <!-- Add Friend Dialog -->
+    <string name="no_user_found">No user found</string>
+    <string name="user_already_friend">User is already your friend!</string>
+    <string name="btn_add_friend">Add Friend</string>
+    <string name="cd_cancel">Cancel</string>
+
+    <!-- Friend Detail Dialog -->
+    <string name="cd_close">Close</string>
+    <string name="dialog_confirm_title">Are you sure?</string>
+    <string name="dialog_confirm_message">Do you really want to remove %1$s?</string>
+    <string name="btn_confirm_remove">Yes, Remove Friend</string>
+    <string name="btn_cancel">Cancel</string>
+    <string name="stats_sales_visited">Sales Visited - %1$d</string>
+    <string name="badges_coming_soon">Badges (Coming Soon)</string>
+    <string name="btn_remove_friend">Remove Friend</string>
 </resources>

@@ -57,6 +57,12 @@ object FriendsStore {
         saveFriends(context)
     }
 
+    //Remove friend
+    fun removeFriend(context: Context, friend: FriendStatus) {
+        friends.remove(friend)
+        saveFriends(context)
+    }
+
     private fun saveFriends(context: Context) {
         val sharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         val editor = sharedPreferences.edit()

@@ -21,10 +21,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import com.cs407.saleselector.R
 import com.cs407.saleselector.ui.model.FriendStatus
 
 @Composable
@@ -35,6 +38,8 @@ fun AddFriendDialog(
     isAlreadyFriend: Boolean,
     onAddFriend: () -> Unit
 ) {
+    val redColor = colorResource(R.color.delete_red)
+
     if (isOpen) {
         Dialog(onDismissRequest = onDismiss) {
             Card(
@@ -48,7 +53,6 @@ fun AddFriendDialog(
                     modifier = Modifier.padding(16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    // --- Top Row: Back Arrow ---
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.Start
@@ -56,7 +60,7 @@ fun AddFriendDialog(
                         IconButton(onClick = onDismiss) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                contentDescription = "Cancel",
+                                contentDescription = stringResource(R.string.cd_cancel),
                                 tint = Color.Black
                             )
                         }
@@ -67,7 +71,7 @@ fun AddFriendDialog(
                     //No user
                     if (searchedUser == null) {
                         Text(
-                            text = "No user found",
+                            text = stringResource(R.string.no_user_found),
                             style = MaterialTheme.typography.titleMedium,
                             color = Color.Gray
                         )
@@ -88,9 +92,9 @@ fun AddFriendDialog(
                         //Already friend
                         if (isAlreadyFriend) {
                             Text(
-                                text = "User is already your friend!",
+                                text = stringResource(R.string.user_already_friend),
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = Color.Red
+                                color = redColor
                             )
                         }
                         //Exists but not friend
@@ -100,7 +104,7 @@ fun AddFriendDialog(
                                 shape = RoundedCornerShape(8.dp),
                                 modifier = Modifier.fillMaxWidth(0.6f)
                             ) {
-                                Text("Add Friend")
+                                Text(stringResource(R.string.btn_add_friend))
                             }
                         }
                         Spacer(modifier = Modifier.height(8.dp))

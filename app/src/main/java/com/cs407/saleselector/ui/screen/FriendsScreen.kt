@@ -1,6 +1,7 @@
 package com.cs407.saleselector.ui.screen
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -36,12 +37,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.cs407.saleselector.R
 import com.cs407.saleselector.ui.components.AddFriendDialog
+import com.cs407.saleselector.ui.components.FriendDetailDialog
 import com.cs407.saleselector.ui.model.FriendStatus
 import com.cs407.saleselector.ui.model.FriendsStore
 import com.cs407.saleselector.ui.model.UserStore
-import androidx.compose.ui.platform.LocalContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,12 +62,25 @@ fun FriendsScreen(
     var searchResult by remember { mutableStateOf<FriendStatus?>(null) }
     var isAlreadyFriend by remember { mutableStateOf(false) }
 
+    var selectedFriend by remember { mutableStateOf<FriendStatus?>(null) }
+    var showDetailDialog by remember { mutableStateOf(false) }
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("My Friends", style = MaterialTheme.typography.headlineLarge) },
+                title = {
+                    Text(
+                        stringResource(R.string.friends_screen_title),
+                        style = MaterialTheme.typography.headlineLarge
+                    )
+                },
                 navigationIcon = {
-                    IconButton(onClick = onBack) { Icon(Icons.AutoMirrored.Filled.ArrowBack, null) }
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = stringResource(R.string.cd_back_arrow)
+                        )
+                    }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent)
             )
@@ -82,23 +100,33 @@ fun FriendsScreen(
             ) {
                 item {
                     Text(
-                        text = "online",
+                        text = stringResource(R.string.status_online),
                         style = MaterialTheme.typography.labelMedium,
                         modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
                     )
                 }
                 items(activeFriends) { friend ->
-                    FriendListItem(name = friend.name, isActive = true)
+                    FriendListItem(name = friend.name, isActive = true,
+                        onClick = {
+                            selectedFriend = friend
+                            showDetailDialog = true
+                        }
+                    )
                 }
                 item {
                     Text(
-                        text = "offline",
+                        text = stringResource(R.string.status_offline),
                         style = MaterialTheme.typography.labelMedium,
                         modifier = Modifier.padding(top = 16.dp, bottom = 4.dp)
                     )
                 }
                 items(inactiveFriends) { friend ->
-                    FriendListItem(name = friend.name, isActive = false)
+                    FriendListItem(name = friend.name, isActive = false,
+                        onClick = {
+                            selectedFriend = friend
+                            showDetailDialog = true
+                        }
+                    )
                 }
             }
 
@@ -109,7 +137,7 @@ fun FriendsScreen(
                     .padding(top = 16.dp, bottom = 24.dp)
             ) {
                 Text(
-                    text = "Add Friends",
+                    text = stringResource(R.string.add_friends_header),
                     style = MaterialTheme.typography.titleMedium,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
@@ -121,7 +149,7 @@ fun FriendsScreen(
                     OutlinedTextField(
                         value = searchQuery,
                         onValueChange = { searchQuery = it },
-                        placeholder = { Text("search by name") }, // Changed to name based on your data
+                        placeholder = { Text(stringResource(R.string.search_placeholder)) },
                         modifier = Modifier.weight(1f),
                         singleLine = true,
                         shape = RoundedCornerShape(8.dp)
@@ -134,7 +162,8 @@ fun FriendsScreen(
                             //User info, name or username case insensitive
                             val query = searchQuery.trim()
                             val foundUser = UserStore.allUsers.find {
-                                it.name.equals(query, ignoreCase = true) || it.userID.equals(query, ignoreCase = true)
+                                it.name.equals(query, ignoreCase = true) ||
+                                        it.userID.equals(query, ignoreCase = true)
                             }
                             searchResult = foundUser
 
@@ -150,13 +179,13 @@ fun FriendsScreen(
                         },
                         shape = RoundedCornerShape(8.dp)
                     ) {
-                        Text("Search")
+                        Text(stringResource(R.string.btn_search))
                     }
                 }
             }
         }
 
-        //Popup for friend
+        //Popup for add friend
         if (showDialog) {
             AddFriendDialog(
                 isOpen = showDialog,
@@ -167,10 +196,21 @@ fun FriendsScreen(
                     //Add friend to friends list
                     if (searchResult != null) {
                         FriendsStore.addFriend(context, searchResult!!)
-
                         showDialog = false
                         searchQuery = ""
                     }
+                }
+            )
+        }
+        //Popup for detail/remove
+        if (showDetailDialog) {
+            FriendDetailDialog(
+                friend = selectedFriend,
+                isOpen = showDetailDialog,
+                onDismiss = { showDetailDialog = false },
+                onRemoveFriend = { friendToRemove ->
+                    FriendsStore.removeFriend(context, friendToRemove)
+                    showDetailDialog = false
                 }
             )
         }
@@ -178,9 +218,15 @@ fun FriendsScreen(
 }
 
 @Composable
-fun FriendListItem(name: String, isActive: Boolean) {
+fun FriendListItem(name: String, isActive: Boolean, onClick: () -> Unit) {
+    //Fetch colors from resources
+    val activeColor = colorResource(R.color.status_online)
+    val inactiveColor = colorResource(R.color.status_offline)
+
     ElevatedCard(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() },
         shape = RoundedCornerShape(8.dp)
     ) {
         Row(
@@ -199,7 +245,7 @@ fun FriendListItem(name: String, isActive: Boolean) {
                 modifier = Modifier
                     .size(12.dp)
                     .background(
-                        color = if (isActive) Color.Green else Color.Gray,
+                        color = if (isActive) activeColor else inactiveColor,
                         shape = CircleShape
                     )
             )
