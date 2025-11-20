@@ -1,6 +1,7 @@
 package com.cs407.saleselector.ui.screen
 
 import android.Manifest
+import android.content.res.Configuration
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -8,10 +9,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.BottomAppBar
@@ -31,19 +34,23 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.cs407.saleselector.R
 import com.cs407.saleselector.ui.components.SaleCard
 import com.cs407.saleselector.ui.model.SaleStore
 import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
-import com.google.maps.android.compose.Marker
-import com.google.maps.android.compose.rememberMarkerState
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapUiSettings
+import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberCameraPositionState
-import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.compose.rememberMarkerState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -64,89 +71,144 @@ fun SalesHomeScreen(
     LaunchedEffect(Unit) {
         permissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
     }
-    val locations = listOf("Verona", "Monona", "Shorewood Hills", "Madison", "Sun Prairie")
+
     var showSheet by remember { mutableStateOf(false) }
 
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(LatLng(43.0731, -89.4012), 14f)
     }
 
+    //Determine orientation
+    val configuration = LocalConfiguration.current
+    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
-                title = {Text("SaleSelector", style = MaterialTheme.typography.headlineLarge)},
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent)
-            )
+            //In landscape smaller bar
+            if (!isLandscape) {
+                CenterAlignedTopAppBar(
+                    title = {Text(stringResource(R.string.home_title), style = MaterialTheme.typography.headlineLarge)},
+                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent)
+                )
+            }
         },
         bottomBar = {
-            BottomAppBar(containerColor = Color.Transparent) {
-                Spacer(Modifier.weight(1f))
-                ExtendedFloatingActionButton(onClick = onOpenMyRoute) {
-                    Text("My Route")
+            //Only show bottom bar in portrait otherwise it eats up space
+            if (!isLandscape) {
+                BottomAppBar(containerColor = Color.Transparent) {
+                    Spacer(Modifier.weight(1f))
+                    ExtendedFloatingActionButton(onClick = onOpenMyRoute) {
+                        Text(stringResource(R.string.btn_my_route))
+                    }
                 }
             }
         }
     ) { paddingValues ->
-        Column(
-          modifier = Modifier
-              .fillMaxSize()
-              .padding(paddingValues)
-              .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ){
+
+        if (isLandscape) {
+            //Landscape
             Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ){
-                OutlinedButton(onClick = onOpenFriends) {
-                    Text("Friends List")
-                }
-                OutlinedButton(onClick = onOpenMySales) {
-                    Text("My Sales")
-                }
-                OutlinedButton(onOpenAccount) {
-                    Text("Account")
-                }
-            }
-            Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-
-                val uiSettings = remember {
-                    MapUiSettings(myLocationButtonEnabled = true)
-                }
-                val properties = remember(hasLocationPermission) {
-                    MapProperties(isMyLocationEnabled = hasLocationPermission)
-                }
-
-                GoogleMap(
-                    modifier = Modifier.fillMaxSize(),
-                    cameraPositionState = cameraPositionState,
-                    uiSettings = uiSettings,
-                    properties = properties
+                //Left Side now holds the buttons
+                Column(
+                    modifier = Modifier
+                        .weight(0.4f)
+                        .fillMaxHeight(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    // Draw markers for all sales
-                    SaleStore.sales.forEach { sale ->
-                        Marker(
-                            state = rememberMarkerState(position = LatLng(sale.lat, sale.lng)),
-                            title = sale.type,
-                            snippet = sale.host
-                        )
+                    Text(stringResource(R.string.home_title), style = MaterialTheme.typography.headlineSmall)
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    OutlinedButton(onClick = onOpenFriends, modifier = Modifier.fillMaxWidth()) {
+                        Text(stringResource(R.string.btn_friends_list))
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedButton(onClick = onOpenMySales, modifier = Modifier.fillMaxWidth()) {
+                        Text(stringResource(R.string.btn_my_sales))
+                    }
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedButton(onClick = onOpenAccount, modifier = Modifier.fillMaxWidth()) {
+                        Text(stringResource(R.string.btn_account))
+                    }
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    Button(onClick = {showSheet = true}, modifier = Modifier.fillMaxWidth()) {
+                        Text(stringResource(R.string.btn_show_nearby))
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    //Moved My Route
+                    ExtendedFloatingActionButton(
+                        onClick = onOpenMyRoute,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(stringResource(R.string.btn_my_route))
                     }
                 }
-            }
 
-            Button(onClick = {showSheet = true}, modifier = Modifier.fillMaxWidth()){
-                Text("Show sales nearby")
+                //Right Side: Map
+                Box(
+                    modifier = Modifier
+                        .weight(0.6f) // Takes 60% width
+                        .fillMaxHeight()
+                ) {
+                    SalesMapContent(
+                        cameraPositionState = cameraPositionState,
+                        hasLocationPermission = hasLocationPermission
+                    )
+                }
+            }
+        } else {
+            //Portrait
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ){
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)
+                ){
+                    OutlinedButton(onClick = onOpenFriends) {
+                        Text(stringResource(R.string.btn_friends_list))
+                    }
+                    OutlinedButton(onClick = onOpenMySales) {
+                        Text(stringResource(R.string.btn_my_sales))
+                    }
+                    OutlinedButton(onClick = onOpenAccount) {
+                        Text(stringResource(R.string.btn_account))
+                    }
+                }
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                ) {
+                    SalesMapContent(
+                        cameraPositionState = cameraPositionState,
+                        hasLocationPermission = hasLocationPermission
+                    )
+                }
+
+                Button(onClick = {showSheet = true}, modifier = Modifier.fillMaxWidth()){
+                    Text(stringResource(R.string.btn_show_nearby))
+                }
             }
         }
-
 
         if (showSheet){
             ModalBottomSheet(onDismissRequest = {showSheet = false}) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text("Nearby Sales", style = MaterialTheme.typography.titleLarge)
+                    Text(stringResource(R.string.sheet_nearby_title), style = MaterialTheme.typography.titleLarge)
                     Spacer(Modifier.height(8.dp))
                     LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         items(SaleStore.sales) {sale -> SaleCard(sale) }
@@ -154,6 +216,35 @@ fun SalesHomeScreen(
                     Spacer(Modifier.height(16.dp))
                 }
             }
+        }
+    }
+}
+
+//Extracted Map Logic to reuse in both layouts
+@Composable
+fun SalesMapContent(
+    cameraPositionState: com.google.maps.android.compose.CameraPositionState,
+    hasLocationPermission: Boolean
+) {
+    val uiSettings = remember {
+        MapUiSettings(myLocationButtonEnabled = true)
+    }
+    val properties = remember(hasLocationPermission) {
+        MapProperties(isMyLocationEnabled = hasLocationPermission)
+    }
+
+    GoogleMap(
+        modifier = Modifier.fillMaxSize(),
+        cameraPositionState = cameraPositionState,
+        uiSettings = uiSettings,
+        properties = properties
+    ) {
+        SaleStore.sales.forEach { sale ->
+            Marker(
+                state = rememberMarkerState(position = LatLng(sale.lat, sale.lng)),
+                title = sale.type,
+                snippet = sale.host
+            )
         }
     }
 }

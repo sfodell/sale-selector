@@ -1,6 +1,14 @@
 <resources>
     <string name="app_name">Sale Selector</string>
 
+    <!-- Home Screen -->
+    <string name="home_title">SaleSelector</string>
+    <string name="btn_my_route">My Route</string>
+    <string name="btn_friends_list">Friends List</string>    <string name="btn_my_sales">My Sales</string>
+    <string name="btn_account">Account</string>
+    <string name="btn_show_nearby">Show sales nearby</string>
+    <string name="sheet_nearby_title">Nearby Sales</string>
+
 
     <!-- Friends Screen -->
     <string name="friends_screen_title">My Friends</string>

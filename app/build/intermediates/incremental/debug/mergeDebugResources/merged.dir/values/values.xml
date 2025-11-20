@@ -132,11 +132,16 @@
     <string name="app_name">Sale Selector</string>
     <string name="autofill">Autofill</string>
     <string name="badges_coming_soon">Badges (Coming Soon)</string>
+    <string name="btn_account">Account</string>
     <string name="btn_add_friend">Add Friend</string>
     <string name="btn_cancel">Cancel</string>
     <string name="btn_confirm_remove">Yes, Remove Friend</string>
+    <string name="btn_friends_list">Friends List</string>
+    <string name="btn_my_route">My Route</string>
+    <string name="btn_my_sales">My Sales</string>
     <string name="btn_remove_friend">Remove Friend</string>
     <string name="btn_search">Search</string>
+    <string name="btn_show_nearby">Show sales nearby</string>
     <string name="call_notification_answer_action">Answer</string>
     <string name="call_notification_answer_video_action">Video</string>
     <string name="call_notification_decline_action">Decline</string>
@@ -173,6 +178,7 @@
     <string name="dialog_confirm_title">Are you sure?</string>
     <string name="dropdown_menu">"Dropdown menu"</string>
     <string name="friends_screen_title">My Friends</string>
+    <string name="home_title">SaleSelector</string>
     <string name="in_progress">In progress</string>
     <string name="indeterminate">Partially checked</string>
     <string name="m3c_bottom_sheet_collapse_description">Collapse bottom sheet</string>
@@ -243,6 +249,7 @@
     <string name="range_start">"Range start"</string>
     <string name="search_placeholder">search by name</string>
     <string name="selected">Selected</string>
+    <string name="sheet_nearby_title">Nearby Sales</string>
     <string name="snackbar_pane_title">Alert</string>
     <string name="state_empty">Empty</string>
     <string name="state_off">Off</string>

@@ -293,11 +293,16 @@ string androidx_startup
 string app_name
 string autofill
 string badges_coming_soon
+string btn_account
 string btn_add_friend
 string btn_cancel
 string btn_confirm_remove
+string btn_friends_list
+string btn_my_route
+string btn_my_sales
 string btn_remove_friend
 string btn_search
+string btn_show_nearby
 string call_notification_answer_action
 string call_notification_answer_video_action
 string call_notification_decline_action
@@ -334,6 +339,7 @@ string dialog_confirm_message
 string dialog_confirm_title
 string dropdown_menu
 string friends_screen_title
+string home_title
 string in_progress
 string indeterminate
 string m3c_bottom_sheet_collapse_description
@@ -400,6 +406,7 @@ string range_end
 string range_start
 string search_placeholder
 string selected
+string sheet_nearby_title
 string snackbar_pane_title
 string state_empty
 string state_off
