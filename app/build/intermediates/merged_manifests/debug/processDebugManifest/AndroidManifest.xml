@@ -46,7 +46,7 @@
         android:theme="@style/Theme.SaleSelector" >
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="""" />
+            android:value="AIzaSyAkmKs7QHVrKlYUOZ7sw7h4Zw8QJSwjLZQ" />
 
         <activity
             android:name="com.cs407.saleselector.MainActivity"
