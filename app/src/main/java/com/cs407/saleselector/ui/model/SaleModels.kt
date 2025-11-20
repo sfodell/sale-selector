@@ -1,19 +1,18 @@
 package com.cs407.saleselector.ui.model
 
+import androidx.compose.runtime.mutableStateListOf
+
 data class Sale(
     val city: String,
     val type: String,
     val host: String,
-    val address: String
+    val address: String,
+    val lat: Double,
+    val lng: Double
 )
 
-object SaleStore{
-    val sales = listOf(
-        Sale("Verona", "Garage Sale", "Sam Odell - (123) 123-4567", "123 Oak St"),
-        Sale("Monona", "Yard Sale", "Michael Kiem - (123) 123-4567", "44 Lake Ave"),
-        Sale("Shorewood Hills", "Garage Sale", "Gavin Austin - (123) 123-4567", "9 Grove Ct"),
-        Sale("Madison", "Garage Sale", "Kalp Patel - (123) 123-4567", "777 Monroe St"),
-    )
+object SaleStore {
+    val sales = mutableStateListOf<Sale>()
 }
 
 data class FriendStatus(
