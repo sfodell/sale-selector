@@ -1,5 +1,7 @@
 package com.cs407.saleselector.ui.screen
 
+import android.content.Context
+import android.location.Geocoder
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,16 +18,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.cs407.saleselector.ui.model.Sale
+import com.cs407.saleselector.ui.model.SaleStore
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -38,6 +39,7 @@ fun AddSaleScreen(
     var host by remember { mutableStateOf("") }
     var address by remember { mutableStateOf("") }
 
+    val context = LocalContext.current
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -84,7 +86,44 @@ fun AddSaleScreen(
                 label = {Text("Address")},
                 modifier = Modifier.fillMaxWidth()
             )
-            Button(onClick = onSave, modifier = Modifier.fillMaxWidth()) {
+            Button(
+                onClick = {
+                    val fullAddress = "$address, $city"
+                    val geocoder = Geocoder(context, Locale.getDefault())
+
+                    val result = geocoder.getFromLocationName(fullAddress, 1)
+
+                    if (!result.isNullOrEmpty()) {
+                        val location = result[0]
+
+                        SaleStore.sales.add(
+                            Sale(
+                                city = city,
+                                type = type,
+                                host = host,
+                                address = address,
+                                lat = location.latitude,
+                                lng = location.longitude
+                            )
+                        )
+                    } else {
+                        // Fallback if geocoder fails (optional)
+                        SaleStore.sales.add(
+                            Sale(
+                                city = city,
+                                type = type,
+                                host = host,
+                                address = address,
+                                lat = 0.0,
+                                lng = 0.0
+                            )
+                        )
+                    }
+
+                    onSave()
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
                 Text("Save")
             }
 

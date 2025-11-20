@@ -1,5 +1,8 @@
 package com.cs407.saleselector.ui.screen
 
+import android.Manifest
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,6 +26,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,9 +37,13 @@ import androidx.compose.ui.unit.dp
 import com.cs407.saleselector.ui.components.SaleCard
 import com.cs407.saleselector.ui.model.SaleStore
 import com.google.android.gms.maps.model.CameraPosition
-import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.rememberMarkerState
+import com.google.maps.android.compose.MapProperties
+import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.rememberCameraPositionState
+import com.google.android.gms.maps.model.LatLng
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,6 +53,17 @@ fun SalesHomeScreen(
     onOpenMySales: () -> Unit,
     onOpenAccount: () -> Unit,
 ){
+    var hasLocationPermission by remember { mutableStateOf(false) }
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        hasLocationPermission = granted
+    }
+
+    LaunchedEffect(Unit) {
+        permissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+    }
     val locations = listOf("Verona", "Monona", "Shorewood Hills", "Madison", "Sun Prairie")
     var showSheet by remember { mutableStateOf(false) }
 
@@ -88,25 +107,38 @@ fun SalesHomeScreen(
                     Text("Account")
                 }
             }
-            Button(onClick = {showSheet = true}, modifier = Modifier.fillMaxWidth()){
-                Text("Show more sales nearby")
-            }
-
-            LazyColumn(
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ){
-                items(SaleStore.sales.take(3)) {sale -> SaleCard(sale) }
-            }
-
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
             ) {
+
+                val uiSettings = remember {
+                    MapUiSettings(myLocationButtonEnabled = true)
+                }
+                val properties = remember(hasLocationPermission) {
+                    MapProperties(isMyLocationEnabled = hasLocationPermission)
+                }
+
                 GoogleMap(
                     modifier = Modifier.fillMaxSize(),
-                    cameraPositionState = cameraPositionState
-                )
+                    cameraPositionState = cameraPositionState,
+                    uiSettings = uiSettings,
+                    properties = properties
+                ) {
+                    // Draw markers for all sales
+                    SaleStore.sales.forEach { sale ->
+                        Marker(
+                            state = rememberMarkerState(position = LatLng(sale.lat, sale.lng)),
+                            title = sale.type,
+                            snippet = sale.host
+                        )
+                    }
+                }
+            }
+
+            Button(onClick = {showSheet = true}, modifier = Modifier.fillMaxWidth()){
+                Text("Show sales nearby")
             }
         }
 

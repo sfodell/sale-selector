@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "com.cs407.saleselector.app-mergeDebugResources-38:/values-v21/values-v21.xml",
+            "outputFile": "com.cs407.saleselector.app-mergeDebugResources-43:/values-v21/values-v21.xml",
             "map": [
                 {
-                    "source": "/Users/mikekiem/.gradle/caches/8.13/transforms/c057df2909277ae698298ba05b65bba1/transformed/core-1.17.0/res/values-v21/values-v21.xml",
+                    "source": "C:\\Users\\Patron\\.gradle\\caches\\8.13\\transforms\\b3aecb55d45deffb085014ede6265e95\\transformed\\core-1.17.0\\res\\values-v21\\values-v21.xml",
                     "from": {
                         "startLines": "2,3,4,5,6,7,8,9,10,13",
                         "startColumns": "4,4,4,4,4,4,4,4,4,4",
