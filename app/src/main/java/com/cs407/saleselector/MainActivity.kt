@@ -46,6 +46,9 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+
+//  testing commit project
+
 @Composable
 fun AppNavigation() {
     val nav = rememberNavController()
