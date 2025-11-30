@@ -16,6 +16,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.cs407.saleselector.ui.model.FriendsStore
 import com.cs407.saleselector.ui.screen.AccountScreen
 import com.cs407.saleselector.ui.screen.AddSaleScreen
 import com.cs407.saleselector.ui.screen.CreateAccountScreen
@@ -29,6 +30,9 @@ import com.cs407.saleselector.ui.theme.SaleSelectorTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        FriendsStore.loadFriends(applicationContext)
+
         enableEdgeToEdge()
         setContent {
             SaleSelectorTheme {
