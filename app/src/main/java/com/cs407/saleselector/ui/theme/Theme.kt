@@ -15,9 +15,10 @@ import androidx.compose.ui.platform.LocalContext
 private val DarkColorScheme = darkColorScheme(
     primary = CustomColors.accent,
     onPrimary = Color.White,
+    secondary = CustomColors.gradientTop,
+    onSecondary = Color.White,tertiary = CustomColors.gradientBottom,
     background = CustomColors.surface,
-    onBackground = Color.Black,
-    surface = CustomColors.surface,
+    surface = Color.White,
     onSurface = Color.Black,
     outline = CustomColors.outline
 )

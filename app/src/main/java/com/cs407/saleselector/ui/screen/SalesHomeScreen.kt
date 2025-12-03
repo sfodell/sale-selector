@@ -20,6 +20,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.MaterialTheme
@@ -41,7 +42,9 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.cs407.saleselector.R
+import com.cs407.saleselector.ui.components.PrimaryButton
 import com.cs407.saleselector.ui.components.SaleCard
+import com.cs407.saleselector.ui.components.SecondaryButton
 import com.cs407.saleselector.ui.model.SaleStore
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
@@ -88,7 +91,10 @@ fun SalesHomeScreen(
             if (!isLandscape) {
                 CenterAlignedTopAppBar(
                     title = {Text(stringResource(R.string.home_title), style = MaterialTheme.typography.headlineLarge)},
-                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent)
+                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
                 )
             }
         },
@@ -125,26 +131,29 @@ fun SalesHomeScreen(
                     Text(stringResource(R.string.home_title), style = MaterialTheme.typography.headlineSmall)
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    OutlinedButton(onClick = onOpenFriends, modifier = Modifier.fillMaxWidth()) {
-                        Text(stringResource(R.string.btn_friends_list))
-                    }
+                    SecondaryButton(
+                        text = stringResource(R.string.btn_friends_list),
+                        onClick = onOpenFriends
+                    )
                     Spacer(modifier = Modifier.height(8.dp))
-                    OutlinedButton(onClick = onOpenMySales, modifier = Modifier.fillMaxWidth()) {
-                        Text(stringResource(R.string.btn_my_sales))
-                    }
+                    SecondaryButton(
+                        text = stringResource(R.string.btn_my_sales),
+                        onClick = onOpenMySales
+                    )
                     Spacer(modifier = Modifier.height(8.dp))
-                    OutlinedButton(onClick = onOpenAccount, modifier = Modifier.fillMaxWidth()) {
-                        Text(stringResource(R.string.btn_account))
-                    }
+                    SecondaryButton(
+                        text = stringResource(R.string.btn_account),
+                        onClick = onOpenAccount
+                    )
                     Spacer(modifier = Modifier.height(24.dp))
 
-                    Button(onClick = {showSheet = true}, modifier = Modifier.fillMaxWidth()) {
-                        Text(stringResource(R.string.btn_show_nearby))
-                    }
+                    PrimaryButton(
+                        text = stringResource(R.string.btn_show_nearby),
+                        onClick = { showSheet = true }
+                    )
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    //Moved My Route
                     ExtendedFloatingActionButton(
                         onClick = onOpenMyRoute,
                         modifier = Modifier.fillMaxWidth()
@@ -178,15 +187,21 @@ fun SalesHomeScreen(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)
                 ){
-                    OutlinedButton(onClick = onOpenFriends) {
-                        Text(stringResource(R.string.btn_friends_list))
-                    }
-                    OutlinedButton(onClick = onOpenMySales) {
-                        Text(stringResource(R.string.btn_my_sales))
-                    }
-                    OutlinedButton(onClick = onOpenAccount) {
-                        Text(stringResource(R.string.btn_account))
-                    }
+                    SecondaryButton(
+                        text = stringResource(R.string.btn_friends_list),
+                        onClick = onOpenFriends,
+                        modifier = Modifier.weight(1f)
+                    )
+                    SecondaryButton(
+                        text = stringResource(R.string.btn_my_sales),
+                        onClick = onOpenMySales,
+                        modifier = Modifier.weight(1f)
+                    )
+                    SecondaryButton(
+                        text = stringResource(R.string.btn_account),
+                        onClick = onOpenAccount,
+                        modifier = Modifier.weight(1f)
+                    )
                 }
                 Box(
                     modifier = Modifier
@@ -199,9 +214,10 @@ fun SalesHomeScreen(
                     )
                 }
 
-                Button(onClick = {showSheet = true}, modifier = Modifier.fillMaxWidth()){
-                    Text(stringResource(R.string.btn_show_nearby))
-                }
+                PrimaryButton(
+                    text = stringResource(R.string.btn_show_nearby),
+                    onClick = { showSheet = true }
+                )
             }
         }
 
