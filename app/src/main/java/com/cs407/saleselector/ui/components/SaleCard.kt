@@ -12,6 +12,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
 import com.cs407.saleselector.ui.model.Sale
 import com.cs407.saleselector.ui.theme.CustomColors
@@ -31,11 +32,12 @@ fun SaleCard(sale: Sale, modifier: Modifier = Modifier) {
         Column(Modifier.padding(16.dp)) {
             Text(
                 text = "${sale.city} • ${sale.type}",
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.primary
+                style = MaterialTheme.typography.bodyLarge,
+                color = colorResource(id = com.cs407.saleselector.R.color.dark_blue)
             )
             Spacer(modifier = Modifier.height(4.dp))
-            Text(text = sale.host, style = MaterialTheme.typography.bodyMedium)
+            Text(text = sale.host, style = MaterialTheme.typography.bodyMedium, color = colorResource(id = com.cs407.saleselector.R.color.dark_blue))
+
             Text(
                 text = sale.address,
                 style = MaterialTheme.typography.bodySmall,

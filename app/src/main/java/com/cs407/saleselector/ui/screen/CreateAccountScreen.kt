@@ -10,6 +10,7 @@ import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -22,6 +23,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 
@@ -38,10 +40,11 @@ fun CreateAccountScreen(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = {Text("Create Account", style = MaterialTheme.typography.headlineLarge)},
+                title = {Text("Create Account", style = MaterialTheme.typography.displayLarge, color = colorResource(id = com.cs407.saleselector.R.color.white))},
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent)
             )
-        }
+        },
+        containerColor = colorResource(id = com.cs407.saleselector.R.color.light_blue)
     ){paddingValues ->
         Column(
             modifier = Modifier
@@ -55,7 +58,16 @@ fun CreateAccountScreen(
                 value = email,
                 onValueChange = {email = it},
                 label = {Text("Email")},
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = colorResource(id = com.cs407.saleselector.R.color.white),
+                    unfocusedBorderColor = colorResource(id = com.cs407.saleselector.R.color.dark_blue),
+                    focusedLabelColor = colorResource(id = com.cs407.saleselector.R.color.white),
+                    unfocusedLabelColor = colorResource(id = com.cs407.saleselector.R.color.dark_blue),
+                    cursorColor = colorResource(id = com.cs407.saleselector.R.color.white),
+                    focusedTextColor = colorResource(id = com.cs407.saleselector.R.color.white),
+                    unfocusedTextColor = colorResource(id = com.cs407.saleselector.R.color.white)
+                )
             )
             OutlinedTextField(
                 value = password,
@@ -63,6 +75,15 @@ fun CreateAccountScreen(
                 label = {Text("Password")},
                 modifier = Modifier.fillMaxWidth(),
                 visualTransformation = PasswordVisualTransformation(),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = colorResource(id = com.cs407.saleselector.R.color.white),
+                    unfocusedBorderColor = colorResource(id = com.cs407.saleselector.R.color.dark_blue),
+                    focusedLabelColor = colorResource(id = com.cs407.saleselector.R.color.white),
+                    unfocusedLabelColor = colorResource(id = com.cs407.saleselector.R.color.dark_blue),
+                    cursorColor = colorResource(id = com.cs407.saleselector.R.color.white),
+                    focusedTextColor = colorResource(id = com.cs407.saleselector.R.color.white),
+                    unfocusedTextColor = colorResource(id = com.cs407.saleselector.R.color.white)
+                )
             )
             OutlinedTextField(
                 value = passwordCheck,
@@ -70,12 +91,23 @@ fun CreateAccountScreen(
                 label = {Text("Re-Enter Password")},
                 modifier = Modifier.fillMaxWidth(),
                 visualTransformation = PasswordVisualTransformation(),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = colorResource(id = com.cs407.saleselector.R.color.white),
+                    unfocusedBorderColor = colorResource(id = com.cs407.saleselector.R.color.dark_blue),
+                    focusedLabelColor = colorResource(id = com.cs407.saleselector.R.color.white),
+                    unfocusedLabelColor = colorResource(id = com.cs407.saleselector.R.color.dark_blue),
+                    cursorColor = colorResource(id = com.cs407.saleselector.R.color.white),
+                    focusedTextColor = colorResource(id = com.cs407.saleselector.R.color.white),
+                    unfocusedTextColor = colorResource(id = com.cs407.saleselector.R.color.white)
+                )
             )
-            Button(onClick = onCreate, modifier = Modifier.fillMaxWidth()) {
-                Text("Create Account")
+            Button(onClick = onCreate, modifier = Modifier.fillMaxWidth(), colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                containerColor = colorResource(id = com.cs407.saleselector.R.color.white)
+            )) {
+                Text("Create Account", color = colorResource(id = com.cs407.saleselector.R.color.dark_blue))
             }
             TextButton(onClick = onToLogin){
-                Text("If you have an account, sign in!")
+                Text("If you have an account, sign in!", color = colorResource(id = com.cs407.saleselector.R.color.dark_blue))
             }
 
         }

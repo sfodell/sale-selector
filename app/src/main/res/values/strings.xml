@@ -9,6 +9,15 @@
     <string name="btn_show_nearby">Show sales nearby</string>
     <string name="sheet_nearby_title">Nearby Sales</string>
 
+    <!-- Login Screen -->
+    <string name="email_hint">Enter Email</string>
+    <string name="password_hint">Enter Password</string>
+    <string name="login_button">Log In or Sign Up</string>
+    <string name="invalid_email">Invalid Email Format</string>
+    <string name="invalid_password">Password should contain at least one lowercase letter, one uppercase letter, and one digit</string>
+    <string name="short_password">Password is too short</string>
+    <string name="empty_email">Email is empty</string>
+    <string name="empty_password">Password is empty</string>
 
     <!-- Friends Screen -->
     <string name="friends_screen_title">My Friends</string>
@@ -34,4 +43,5 @@
     <string name="stats_sales_visited">Sales Visited - %1$d</string>
     <string name="badges_coming_soon">Badges (Coming Soon)</string>
     <string name="btn_remove_friend">Remove Friend</string>
+    <string name="btn_open_drawer">drawer</string>
 </resources>

@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -26,6 +27,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -71,20 +73,23 @@ fun FriendsScreen(
                 title = {
                     Text(
                         stringResource(R.string.friends_screen_title),
-                        style = MaterialTheme.typography.headlineLarge
+                        style = MaterialTheme.typography.displayLarge,
+                        color = colorResource(id = com.cs407.saleselector.R.color.white)
                     )
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.cd_back_arrow)
+                            contentDescription = stringResource(R.string.cd_back_arrow),
+                            tint = colorResource(id = com.cs407.saleselector.R.color.white)
                         )
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent)
             )
-        }
+        },
+        containerColor = colorResource(id = R.color.light_blue)
     ) { paddingValues ->
 
         Column(
@@ -102,7 +107,8 @@ fun FriendsScreen(
                     Text(
                         text = stringResource(R.string.status_online),
                         style = MaterialTheme.typography.labelMedium,
-                        modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
+                        modifier = Modifier.padding(top = 8.dp, bottom = 4.dp),
+                        color = colorResource(id = R.color.white)
                     )
                 }
                 items(activeFriends) { friend ->
@@ -117,7 +123,9 @@ fun FriendsScreen(
                     Text(
                         text = stringResource(R.string.status_offline),
                         style = MaterialTheme.typography.labelMedium,
-                        modifier = Modifier.padding(top = 16.dp, bottom = 4.dp)
+                        modifier = Modifier.padding(top = 16.dp, bottom = 4.dp),
+                        color = colorResource(id = R.color.white)
+
                     )
                 }
                 items(inactiveFriends) { friend ->
@@ -139,7 +147,8 @@ fun FriendsScreen(
                 Text(
                     text = stringResource(R.string.add_friends_header),
                     style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(bottom = 8.dp)
+                    modifier = Modifier.padding(bottom = 8.dp),
+                    color = colorResource(id = R.color.white)
                 )
 
                 Row(
@@ -152,7 +161,20 @@ fun FriendsScreen(
                         placeholder = { Text(stringResource(R.string.search_placeholder)) },
                         modifier = Modifier.weight(1f),
                         singleLine = true,
-                        shape = RoundedCornerShape(8.dp)
+                        shape = RoundedCornerShape(8.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = colorResource(id = R.color.white),
+                            unfocusedBorderColor = colorResource(id = R.color.dark_blue),
+                            cursorColor = colorResource(id = R.color.white),
+                            focusedTextColor = colorResource(id = R.color.white),
+                            unfocusedTextColor = colorResource(id = R.color.white),
+                            focusedLabelColor = colorResource(id = R.color.white),
+                            unfocusedLabelColor = colorResource(id = R.color.white),
+                            disabledPlaceholderColor = colorResource(id = R.color.white),
+                            focusedPlaceholderColor = colorResource(id = R.color.white),
+                            unfocusedPlaceholderColor = colorResource(id = R.color.dark_blue)
+
+                        )
                     )
 
                     Spacer(modifier = Modifier.width(8.dp))
@@ -177,9 +199,14 @@ fun FriendsScreen(
                             //Show dialog
                             showDialog = true
                         },
-                        shape = RoundedCornerShape(8.dp)
+                        shape = RoundedCornerShape(8.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = colorResource(id = R.color.dark_blue),
+
+                            )
                     ) {
-                        Text(stringResource(R.string.btn_search))
+                        Text(stringResource(R.string.btn_search),
+                            color = colorResource(id = android.R.color.white))
                     }
                 }
             }
@@ -238,7 +265,7 @@ fun FriendListItem(name: String, isActive: Boolean, onClick: () -> Unit) {
         ) {
             Text(
                 text = name,
-                style = MaterialTheme.typography.titleMedium
+                style = MaterialTheme.typography.bodyLarge
             )
 
             Box(

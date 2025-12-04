@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "463128134866",
+    "project_id": "saleselector-7222d",
+    "storage_bucket": "saleselector-7222d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:463128134866:android:dcee7280aa48fd5320590b",
+        "android_client_info": {
+          "package_name": "com.cs407.saleselector"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBPvtSIwctf8zjUmmG7Bg4vhCE4svuKYo4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
