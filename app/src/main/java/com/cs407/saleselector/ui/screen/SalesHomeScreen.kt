@@ -7,27 +7,30 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.BottomAppBar
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Button
-import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.ModalDrawerSheet
+import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -37,7 +40,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -90,53 +92,21 @@ fun SalesHomeScreen(
     }
 
     var showSheet by remember { mutableStateOf(false) }
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
 
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(LatLng(43.0731, -89.4012), 14f)
     }
 
-    //Determine orientation
-    val configuration = LocalConfiguration.current
-    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
-
-    Scaffold(
-        topBar = {
-            //In landscape smaller bar
-            if (!isLandscape) {
-                CenterAlignedTopAppBar(
-                    title = {Text(stringResource(R.string.home_title), style = MaterialTheme.typography.headlineLarge)},
-                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent)
-                )
-            }
-        },
-        bottomBar = {
-            //Only show bottom bar in portrait otherwise it eats up space
-            if (!isLandscape) {
-                BottomAppBar(containerColor = Color.Transparent) {
-                    Spacer(Modifier.weight(1f))
-                    ExtendedFloatingActionButton(onClick = onOpenMyRoute) {
-                        Text(stringResource(R.string.btn_my_route))
-                    }
-                }
-            }
-        }
-    ) { paddingValues ->
-
-        if (isLandscape) {
-            //Landscape
-            Row(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                //Left Side now holds the buttons
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        gesturesEnabled = drawerState.isOpen,
+        drawerContent = {
+            ModalDrawerSheet {
                 Column(
                     modifier = Modifier
-                        .weight(0.4f)
-                        .fillMaxHeight(),
-                    verticalArrangement = Arrangement.Center,
+                        .fillMaxHeight()
+                        .padding(16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(stringResource(R.string.home_title), style = MaterialTheme.typography.headlineSmall)
@@ -153,85 +123,81 @@ fun SalesHomeScreen(
                     OutlinedButton(onClick = onOpenAccount, modifier = Modifier.fillMaxWidth()) {
                         Text(stringResource(R.string.btn_account))
                     }
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    Button(onClick = {showSheet = true}, modifier = Modifier.fillMaxWidth()) {
-                        Text(stringResource(R.string.btn_show_nearby))
-                    }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    //Moved My Route
-                    ExtendedFloatingActionButton(
-                        onClick = onOpenMyRoute,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Text(stringResource(R.string.btn_my_route))
-                    }
-                }
-
-                //Right Side: Map
-                Box(
-                    modifier = Modifier
-                        .weight(0.6f) // Takes 60% width
-                        .fillMaxHeight()
-                ) {
-                    SalesMapContent(
-                        cameraPositionState = cameraPositionState,
-                        hasLocationPermission = hasLocationPermission
-                    )
-                }
-            }
-        } else {
-            //Portrait
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ){
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)
-                ){
-                    OutlinedButton(onClick = onOpenFriends) {
-                        Text(stringResource(R.string.btn_friends_list))
-                    }
-                    OutlinedButton(onClick = onOpenMySales) {
-                        Text(stringResource(R.string.btn_my_sales))
-                    }
-                    OutlinedButton(onClick = onOpenAccount) {
-                        Text(stringResource(R.string.btn_account))
-                    }
-                }
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f)
-                ) {
-                    SalesMapContent(
-                        cameraPositionState = cameraPositionState,
-                        hasLocationPermission = hasLocationPermission
-                    )
-                }
-
-                Button(onClick = {showSheet = true}, modifier = Modifier.fillMaxWidth()){
-                    Text(stringResource(R.string.btn_show_nearby))
                 }
             }
         }
+    ) {
+        Scaffold { paddingValues ->
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+            ) {
+                // Map content takes up the whole screen
+                SalesMapContent(
+                    cameraPositionState = cameraPositionState,
+                    hasLocationPermission = hasLocationPermission
+                )
 
-        if (showSheet){
-            ModalBottomSheet(onDismissRequest = {showSheet = false}) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(stringResource(R.string.sheet_nearby_title), style = MaterialTheme.typography.titleLarge)
-                    Spacer(Modifier.height(8.dp))
-                    LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        items(SaleStore.sales) {sale -> SaleCard(sale) }
+                // FABs and other UI elements are layered on top of the map
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.SpaceBetween,
+                    horizontalAlignment = Alignment.Start
+                ) {
+                    FloatingActionButton(
+                        onClick = { scope.launch { drawerState.open() } },
+                    ) {
+                        Icon(Icons.Default.Menu, contentDescription = stringResource(R.string.btn_friends_list))
                     }
-                    Spacer(Modifier.height(16.dp))
+
+                    // Bottom content alignment depends on orientation
+                    val configuration = LocalConfiguration.current
+                    val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+
+                    if (isLandscape) {
+                        // In landscape, group buttons on the right
+                        Column(horizontalAlignment = Alignment.End) {
+                            Button(onClick = { showSheet = true }, modifier = Modifier.fillMaxWidth(0.4f)) {
+                                Text(stringResource(R.string.btn_show_nearby))
+                            }
+                            Spacer(Modifier.height(8.dp))
+                            ExtendedFloatingActionButton(
+                                onClick = onOpenMyRoute,
+                                modifier = Modifier.fillMaxWidth(0.4f)
+                            ) {
+                                Text(stringResource(R.string.btn_my_route))
+                            }
+                        }
+                    } else {
+                        // In portrait, stack buttons at the bottom
+                        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+                            Button(onClick = { showSheet = true }, modifier = Modifier.fillMaxWidth()) {
+                                Text(stringResource(R.string.btn_show_nearby))
+                            }
+                            Spacer(Modifier.height(8.dp))
+                            ExtendedFloatingActionButton(onClick = onOpenMyRoute) {
+                                Text(stringResource(R.string.btn_my_route))
+                            }
+                        }
+                    }
                 }
+            }
+        }
+    }
+
+
+    if (showSheet){
+        ModalBottomSheet(onDismissRequest = {showSheet = false}) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(stringResource(R.string.sheet_nearby_title), style = MaterialTheme.typography.titleLarge)
+                Spacer(Modifier.height(8.dp))
+                LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    items(SaleStore.sales) {sale -> SaleCard(sale) }
+                }
+                Spacer(Modifier.height(16.dp))
             }
         }
     }

@@ -43,4 +43,5 @@
     <string name="stats_sales_visited">Sales Visited - %1$d</string>
     <string name="badges_coming_soon">Badges (Coming Soon)</string>
     <string name="btn_remove_friend">Remove Friend</string>
+    <string name="btn_open_drawer">drawer</string>
 </resources>
