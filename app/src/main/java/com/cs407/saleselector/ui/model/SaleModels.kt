@@ -7,12 +7,14 @@ import com.google.gson.reflect.TypeToken
 
 
 data class Sale(
-    val city: String,
-    val type: String,
-    val host: String,
-    val address: String,
-    val lat: Double,
-    val lng: Double
+    val id: String = "", // Add unique ID for each sale
+    val userId: String = "", // Firebase user ID
+    val city: String = "",
+    val type: String = "",
+    val host: String = "",
+    val address: String = "",
+    val lat: Double = 0.0,
+    val lng: Double = 0.0
 )
 
 object SaleStore {
