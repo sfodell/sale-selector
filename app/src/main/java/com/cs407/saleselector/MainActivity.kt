@@ -55,7 +55,12 @@ fun AppNavigation() {
     NavHost(navController = nav, startDestination = "login") {
         composable("login") {
             LoginScreen(
-                onLogin = { nav.navigate("home") },
+                onLogin = {
+                    nav.navigate("home") {
+                        popUpTo("login") { inclusive = true }
+                        launchSingleTop = true
+                    }
+                },
                 onToCreate = { nav.navigate("create") },
             )
         }
@@ -97,7 +102,8 @@ fun AppNavigation() {
         }
         composable("account") {
             AccountScreen(
-                onBack = { nav.popBackStack() }
+                onBack = { nav.popBackStack() },
+                onLogout = {nav.navigate("login")}
             )
         }
     }
