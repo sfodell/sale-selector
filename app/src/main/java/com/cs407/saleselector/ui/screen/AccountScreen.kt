@@ -20,12 +20,15 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AccountScreen(
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onLogout: () -> Unit
 ){
     Scaffold(
         topBar = {
@@ -50,14 +53,41 @@ fun AccountScreen(
                 .padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Text("Email: user@example.com")
+            val currentUser = Firebase.auth.currentUser
+            val userEmail = currentUser?.email ?: "No email found"
+
+            Text("Email: $userEmail")
+
             Button(
                 onClick = {
-                    //implement sign out
+                    // Sign out
+                    Firebase.auth.signOut()
+                    onLogout() // Navigate to login page
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Sign Out")
+            }
+
+            Button(
+                onClick = {
+                    // Delete account
+                    val user = Firebase.auth.currentUser
+                    user?.delete()?.addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            // Account deleted successfully
+                            onLogout() // Navigate to login page
+                        } else {
+
+                        }
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                    containerColor = Color.Red
+                )
+            ) {
+                Text("Delete Account")
             }
         }
     }

@@ -26,6 +26,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.cs407.saleselector.ui.model.Sale
 import com.cs407.saleselector.ui.model.SaleStore
+import kotlinx.coroutines.launch
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -38,8 +39,12 @@ fun AddSaleScreen(
     var type by remember { mutableStateOf("")}
     var host by remember { mutableStateOf("") }
     var address by remember { mutableStateOf("") }
+    var error by remember { mutableStateOf<String?>(null) }
+    var isSaving by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -86,38 +91,48 @@ fun AddSaleScreen(
                 label = {Text("Address")},
                 modifier = Modifier.fillMaxWidth()
             )
+
+            if (error != null) {
+                Text(text = error!!, color = Color.Red)
+            }
+
             Button(
                 onClick = {
-                    val fullAddress = "$address, $city"
-                    val geocoder = Geocoder(context, Locale.getDefault())
+                    scope.launch {
+                        isSaving = true
+                        error = null
 
-                    val result = geocoder.getFromLocationName(fullAddress, 1)
+                        val fullAddress = "$address, $city"
+                        val geocoder = Geocoder(context, Locale.getDefault())
 
-                    if (!result.isNullOrEmpty()) {
-                        val location = result[0]
+                        val result = geocoder.getFromLocationName(fullAddress, 1)
 
-                        SaleStore.sales.add(
-                            Sale(
-                                city = city,
-                                type = type,
-                                host = host,
-                                address = address,
-                                lat = location.latitude,
-                                lng = location.longitude
+                        if (!result.isNullOrEmpty()) {
+                            val location = result[0]
+
+                            SaleStore.sales.add(
+                                Sale(
+                                    city = city,
+                                    type = type,
+                                    host = host,
+                                    address = address,
+                                    lat = location.latitude,
+                                    lng = location.longitude
+                                )
                             )
-                        )
-                    } else {
-                        // Fallback if geocoder fails (optional)
-                        SaleStore.sales.add(
-                            Sale(
-                                city = city,
-                                type = type,
-                                host = host,
-                                address = address,
-                                lat = 0.0,
-                                lng = 0.0
+                        } else {
+                            // Fallback if geocoder fails
+                            SaleStore.sales.add(
+                                Sale(
+                                    city = city,
+                                    type = type,
+                                    host = host,
+                                    address = address,
+                                    lat = 0.0,
+                                    lng = 0.0
+                                )
                             )
-                        )
+                        }
                     }
 
                     onSave()
