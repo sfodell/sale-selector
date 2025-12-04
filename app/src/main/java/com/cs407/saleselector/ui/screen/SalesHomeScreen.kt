@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -41,6 +42,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.cs407.saleselector.R
@@ -102,26 +104,28 @@ fun SalesHomeScreen(
         drawerState = drawerState,
         gesturesEnabled = drawerState.isOpen,
         drawerContent = {
-            ModalDrawerSheet {
+            ModalDrawerSheet(
+                drawerContainerColor = colorResource(id = com.cs407.saleselector.R.color.light_blue),
+            ) {
                 Column(
                     modifier = Modifier
                         .fillMaxHeight()
                         .padding(16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text(stringResource(R.string.home_title), style = MaterialTheme.typography.headlineSmall)
+                    Text(stringResource(R.string.home_title), style = MaterialTheme.typography.displayLarge, color = colorResource(id = com.cs407.saleselector.R.color.white))
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    OutlinedButton(onClick = onOpenFriends, modifier = Modifier.fillMaxWidth()) {
-                        Text(stringResource(R.string.btn_friends_list))
+                    OutlinedButton(onClick = onOpenFriends, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.outlinedButtonColors(containerColor = colorResource(id = com.cs407.saleselector.R.color.white))) {
+                        Text(stringResource(R.string.btn_friends_list), color = colorResource(id = com.cs407.saleselector.R.color.dark_blue))
                     }
                     Spacer(modifier = Modifier.height(8.dp))
-                    OutlinedButton(onClick = onOpenMySales, modifier = Modifier.fillMaxWidth()) {
-                        Text(stringResource(R.string.btn_my_sales))
+                    OutlinedButton(onClick = onOpenMySales, modifier = Modifier.fillMaxWidth(),  colors = ButtonDefaults.outlinedButtonColors(containerColor = colorResource(id = com.cs407.saleselector.R.color.white))) {
+                        Text(stringResource(R.string.btn_my_sales), color = colorResource(id = com.cs407.saleselector.R.color.dark_blue))
                     }
                     Spacer(modifier = Modifier.height(8.dp))
-                    OutlinedButton(onClick = onOpenAccount, modifier = Modifier.fillMaxWidth()) {
-                        Text(stringResource(R.string.btn_account))
+                    OutlinedButton(onClick = onOpenAccount, modifier = Modifier.fillMaxWidth(),  colors = ButtonDefaults.outlinedButtonColors(containerColor = colorResource(id = com.cs407.saleselector.R.color.white), )) {
+                        Text(stringResource(R.string.btn_account), color = colorResource(id = com.cs407.saleselector.R.color.dark_blue))
                     }
                 }
             }
@@ -149,6 +153,8 @@ fun SalesHomeScreen(
                 ) {
                     FloatingActionButton(
                         onClick = { scope.launch { drawerState.open() } },
+                        containerColor = colorResource(id = com.cs407.saleselector.R.color.white),
+                        contentColor = colorResource(id = com.cs407.saleselector.R.color.dark_blue)
                     ) {
                         Icon(Icons.Default.Menu, contentDescription = stringResource(R.string.btn_friends_list))
                     }
@@ -160,13 +166,17 @@ fun SalesHomeScreen(
                     if (isLandscape) {
                         // In landscape, group buttons on the right
                         Column(horizontalAlignment = Alignment.End) {
-                            Button(onClick = { showSheet = true }, modifier = Modifier.fillMaxWidth(0.4f)) {
+                            Button(onClick = { showSheet = true }, modifier = Modifier.fillMaxWidth(0.4f),
+                                colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = com.cs407.saleselector.R.color.light_blue))
+                            ) {
                                 Text(stringResource(R.string.btn_show_nearby))
                             }
                             Spacer(Modifier.height(8.dp))
                             ExtendedFloatingActionButton(
                                 onClick = onOpenMyRoute,
-                                modifier = Modifier.fillMaxWidth(0.4f)
+                                modifier = Modifier.fillMaxWidth(0.4f),
+                                containerColor = colorResource(id = com.cs407.saleselector.R.color.white),
+                                contentColor = colorResource(id = com.cs407.saleselector.R.color.dark_blue)
                             ) {
                                 Text(stringResource(R.string.btn_my_route))
                             }
@@ -174,11 +184,17 @@ fun SalesHomeScreen(
                     } else {
                         // In portrait, stack buttons at the bottom
                         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
-                            Button(onClick = { showSheet = true }, modifier = Modifier.fillMaxWidth()) {
+                            Button(onClick = { showSheet = true }, modifier = Modifier.fillMaxWidth(0.6f), colors = ButtonDefaults.buttonColors(
+                                containerColor = colorResource(id = com.cs407.saleselector.R.color.light_blue)
+                            )) {
                                 Text(stringResource(R.string.btn_show_nearby))
                             }
                             Spacer(Modifier.height(8.dp))
-                            ExtendedFloatingActionButton(onClick = onOpenMyRoute) {
+                            ExtendedFloatingActionButton(onClick = onOpenMyRoute,
+                                containerColor = colorResource(com.cs407.saleselector.R.color.white),
+                                contentColor = colorResource(com.cs407.saleselector.R.color.dark_blue),
+                                modifier = Modifier.fillMaxWidth(0.6f)
+                            ) {
                                 Text(stringResource(R.string.btn_my_route))
                             }
                         }

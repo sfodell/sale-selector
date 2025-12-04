@@ -100,10 +100,9 @@ fun LogInSignUpButton(
         modifier = modifier
             .fillMaxWidth(0.8f)
             .height(50.dp),
-        border = BorderStroke(2.dp, colorResource(id = com.cs407.saleselector.R.color.dark_blue)),
         colors = ButtonDefaults.buttonColors(colorResource(id = com.cs407.saleselector.R.color.white)),
 
-    ) {
+        ) {
         Text(stringResource(com.cs407.saleselector.R.string.login_button),
             color = colorResource(id = com.cs407.saleselector.R.color.dark_blue))
     }

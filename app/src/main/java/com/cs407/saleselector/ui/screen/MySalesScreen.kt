@@ -28,6 +28,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
 import com.cs407.saleselector.data.SaleRepository
 import com.cs407.saleselector.ui.components.SaleCard
@@ -60,40 +61,41 @@ fun MySalesScreen(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("My Sales", style = MaterialTheme.typography.headlineLarge) },
+                title = { Text("My Sales", style = MaterialTheme.typography.displayLarge, color = colorResource(id = com.cs407.saleselector.R.color.white)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, null)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, null, tint = colorResource(id = com.cs407.saleselector.R.color.white))
                     }
                 },
                 actions = {
                     IconButton(onClick = onAddSale){
-                       Icon(Icons.Filled.Add, null)
+                        Icon(Icons.Filled.Add, null, tint = colorResource(id = com.cs407.saleselector.R.color.white))
                     }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent)
             )
-        }
+        },
+        containerColor = colorResource(id = com.cs407.saleselector.R.color.light_blue)
     ){ paddingValues ->
- //       if (isLoading) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
+        //       if (isLoading) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
 
+        }
+        //      } else {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            items(mySales) { sale: Sale ->
+                SaleCard(sale)
             }
-  //      } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(mySales) { sale: Sale ->
-                    SaleCard(sale)
-                }
-            }
-      //  }
+        }
+        //  }
     }
 }
