@@ -1,6 +1,7 @@
 package com.cs407.saleselector.ui.screen
 
 import android.R
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,11 +10,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -26,8 +29,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -47,7 +52,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun ErrorText(error: String?, modifier: Modifier = Modifier) {
     if (error != null)
-        Text(text = error, color = Color.Red, textAlign = TextAlign.Center)
+        Text(text = error, color = colorResource(id = com.cs407.saleselector.R.color.white), textAlign = TextAlign.Center)
 }
 
 @Composable
@@ -94,9 +99,13 @@ fun LogInSignUpButton(
         onClick = onClick,
         modifier = modifier
             .fillMaxWidth(0.8f)
-            .height(50.dp)
+            .height(50.dp),
+        border = BorderStroke(2.dp, colorResource(id = com.cs407.saleselector.R.color.dark_blue)),
+        colors = ButtonDefaults.buttonColors(colorResource(id = com.cs407.saleselector.R.color.white)),
+
     ) {
-        Text(stringResource(com.cs407.saleselector.R.string.login_button))
+        Text(stringResource(com.cs407.saleselector.R.string.login_button),
+            color = colorResource(id = com.cs407.saleselector.R.color.dark_blue))
     }
 }
 
@@ -114,10 +123,13 @@ fun LoginScreen(
     Scaffold (
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Log In", style = MaterialTheme.typography.headlineLarge)},
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent)
+                title = { Text("Log In", style = MaterialTheme.typography.displayLarge,
+                    color = colorResource(id = com.cs407.saleselector.R.color.white))},
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = colorResource(id = com.cs407.saleselector.R.color.light_blue)),
+                modifier = Modifier.fillMaxWidth()
             )
-        }
+        },
+        containerColor = colorResource(com.cs407.saleselector.R.color.light_blue)
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -125,23 +137,42 @@ fun LoginScreen(
                 .padding(paddingValues)
                 .padding(20.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ){
             OutlinedTextField( // userEmail
                 value = email,
                 onValueChange = {email = it},
                 label = {Text("Email")},
-                modifier = Modifier.fillMaxWidth())
+                modifier = Modifier.fillMaxWidth(),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = colorResource(id = com.cs407.saleselector.R.color.white),
+                    unfocusedBorderColor = colorResource(id = com.cs407.saleselector.R.color.dark_blue),
+                    focusedLabelColor = colorResource(id = com.cs407.saleselector.R.color.white),
+                    unfocusedLabelColor = colorResource(id = com.cs407.saleselector.R.color.dark_blue),
+                    cursorColor = colorResource(id = com.cs407.saleselector.R.color.white),
+                    focusedTextColor = colorResource(id = com.cs407.saleselector.R.color.white),
+                    unfocusedTextColor = colorResource(id = com.cs407.saleselector.R.color.white)
+                ))
             OutlinedTextField(  // userPassword
                 value = password,
                 onValueChange = {password = it},
                 label = {Text("Password")},
                 modifier = Modifier.fillMaxWidth(),
-                visualTransformation = PasswordVisualTransformation())
+                visualTransformation = PasswordVisualTransformation(),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = colorResource(id = com.cs407.saleselector.R.color.white),
+                    unfocusedBorderColor = colorResource(id = com.cs407.saleselector.R.color.dark_blue),
+                    focusedLabelColor = colorResource(id = com.cs407.saleselector.R.color.white),
+                    unfocusedLabelColor = colorResource(id = com.cs407.saleselector.R.color.dark_blue),
+                    cursorColor = colorResource(id = com.cs407.saleselector.R.color.white),
+                    focusedTextColor = colorResource(id = com.cs407.saleselector.R.color.white),
+                    unfocusedTextColor = colorResource(id = com.cs407.saleselector.R.color.white)
+                ))
             LogInSignUpButton(
                 email = email,
                 password = password,
                 modifier = Modifier.fillMaxWidth(),
+
                 onClick = {
                     error = null
 
@@ -194,15 +225,17 @@ fun LoginScreen(
                     }
                 }
             )
-            ErrorText(error = error)
+            ErrorText(error = error,)
             TextButton(onClick = onToCreate) {
-                Text("If you don't have an account, create one!")
+                Text(text ="If you don't have an account, create one!",
+                    color = colorResource(id = com.cs407.saleselector.R.color.dark_blue))
             }
-            Divider()
+            Divider(color = colorResource(id = com.cs407.saleselector.R.color.dark_blue),)
             TextButton(onClick = {
                 //implement in the future
             }){
-                Text("Forgot Password?")
+                Text("Forgot Password?",
+                    color = colorResource(id = com.cs407.saleselector.R.color.dark_blue))
             }
         }
     }

@@ -6,10 +6,10 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.googlefonts.Font
 import androidx.compose.ui.text.googlefonts.GoogleFont
-import androidx.compose.ui.unit.sp
-import com.cs407.saleselector.R // Make sure this matches your package name
 
-// 1. Initialize the Google Font provider
+import androidx.compose.ui.unit.sp
+import com.cs407.saleselector.R
+
 @OptIn(androidx.compose.ui.text.ExperimentalTextApi::class)
 val provider = GoogleFont.Provider(
     providerAuthority = "com.google.android.gms.fonts",
@@ -17,44 +17,50 @@ val provider = GoogleFont.Provider(
     certificates = R.array.com_google_android_gms_fonts_certs
 )
 
-// 2. Define the font to download
-@OptIn(androidx.compose.ui.text.ExperimentalTextApi::class)
-val ralewayFont = GoogleFont("Raleway")
 
-// 3. Create the FontFamily
+// 👇 Renamed this to be more descriptive
 @OptIn(androidx.compose.ui.text.ExperimentalTextApi::class)
-val ralewayFontFamily = FontFamily(
-    Font(googleFont = ralewayFont, fontProvider = provider),
-    Font(googleFont = ralewayFont, fontProvider = provider, weight = FontWeight.Bold)
+val pacificoFont = GoogleFont("Yellowtail")
+val titilliumFont = GoogleFont("Titillium Web")
+
+
+// 👇 Renamed this as well
+@OptIn(androidx.compose.ui.text.ExperimentalTextApi::class)
+val pacificoFontFamily = FontFamily(
+    Font(googleFont = pacificoFont, fontProvider = provider, weight = FontWeight.Normal)
+)
+val titilliumFontFamily = FontFamily(
+    Font(googleFont = titilliumFont, fontProvider = provider, weight = FontWeight.Normal)
 )
 
-// 4. Set up the Typography to use the new font family
+// Set up the Typography to use the new font family
 val Typography = Typography(
+    // Apply the font to the styles you want to change.
+    // For a signature font, it's best suited for large, decorative text like displayLarge.
     displayLarge = TextStyle(
-        fontFamily = ralewayFontFamily,
-        fontWeight = FontWeight.Bold,
-        fontSize = 50.sp,
-        lineHeight = 64.sp,
-        letterSpacing = (-0.25).sp
+        fontFamily = pacificoFontFamily, // <-- Use the new font family
+        fontWeight = FontWeight.Bold, // Momo Signature is best at a normal weight
+        fontSize = 50.sp
     ),
+    // You can apply it to other styles too
     displayMedium = TextStyle(
-        fontFamily = ralewayFontFamily,
-        fontWeight = FontWeight.Bold,
-        fontSize = 45.sp,
-        lineHeight = 52.sp,
-        letterSpacing = 0.sp
+        fontFamily = titilliumFontFamily,
+        fontWeight = FontWeight.Normal,
+        fontSize = 45.sp
     ),
-    // Define for other styles like titleLarge, bodyLarge, labelSmall, etc.
-    // Example for body text and buttons (label)
+    // Keep other text styles (like body and labels) with a more readable font.
+    // Using the default font here.
     bodyLarge = TextStyle(
-        fontFamily = ralewayFontFamily,
+        fontFamily = FontFamily.Default, // <-- Use a readable font for body text
         fontWeight = FontWeight.Normal,
         fontSize = 16.sp,
         lineHeight = 24.sp,
         letterSpacing = 0.5.sp
     ),
-    labelLarge = TextStyle(
-        fontFamily = ralewayFontFamily,
+    // ... other text styles
+
+labelLarge = TextStyle(
+        fontFamily = titilliumFontFamily,
         fontWeight = FontWeight.Bold,
         fontSize = 14.sp,
         lineHeight = 20.sp,
