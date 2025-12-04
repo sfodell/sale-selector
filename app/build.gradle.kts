@@ -62,6 +62,7 @@ dependencies {
     implementation(libs.androidx.compose.foundation.layout)
     implementation("androidx.compose.ui:ui-text-google-fonts:1.10.0")
     implementation(libs.androidx.ui)
+    implementation(libs.play.services.location)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
