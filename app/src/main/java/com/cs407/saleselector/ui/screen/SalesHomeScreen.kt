@@ -299,19 +299,5 @@ fun SalesMapContent(
             )
         }
 
-        if (currentLocation != null) {
-            MarkerComposable(
-                state = markerState,
-                title = "Your Location",
-                content = {
-                    Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .background(Color.Blue, CircleShape)
-                            .border(3.dp, Color.White, CircleShape)
-                    )
-                }
-            )
-        }
     }
 }
