@@ -79,15 +79,20 @@ fun SalesHomeScreen(
     onOpenAccount: () -> Unit,
 ){
     var allSales by remember { mutableStateOf<List<Sale>>(emptyList()) }
+    var refreshTrigger by remember { mutableStateOf(0) }
     val scope = rememberCoroutineScope()
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(refreshTrigger) {
         scope.launch {
             val result = SaleRepository.getAllSales()
             result.onSuccess { sales ->
                 allSales = sales
             }
         }
+    }
+
+    fun refreshSales() {
+        refreshTrigger++
     }
 
 
@@ -150,7 +155,8 @@ fun SalesHomeScreen(
                 // Map content takes up the whole screen
                 SalesMapContent(
                     cameraPositionState = cameraPositionState,
-                    hasLocationPermission = hasLocationPermission
+                    hasLocationPermission = hasLocationPermission,
+                    sales = allSales
                 )
 
                 // FABs and other UI elements are layered on top of the map
@@ -221,7 +227,7 @@ fun SalesHomeScreen(
                 Text(stringResource(R.string.sheet_nearby_title), style = MaterialTheme.typography.titleLarge)
                 Spacer(Modifier.height(8.dp))
                 LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    items(SaleStore.sales) {sale -> SaleCard(sale) }
+                    items(allSales) {sale -> SaleCard(sale) }
                 }
                 Spacer(Modifier.height(16.dp))
             }
@@ -233,7 +239,8 @@ fun SalesHomeScreen(
 @Composable
 fun SalesMapContent(
     cameraPositionState: com.google.maps.android.compose.CameraPositionState,
-    hasLocationPermission: Boolean
+    hasLocationPermission: Boolean,
+    sales: List<Sale>
 ) {
     val context = LocalContext.current
     val fusedLocationClient = remember {
@@ -269,7 +276,6 @@ fun SalesMapContent(
                     currentLocation = newLoc
                     markerState.position = newLoc
 
-                    // MOVE CAMERA LIKE IN CLIMARK
                     cameraPositionState.position = CameraPosition.fromLatLngZoom(newLoc, 15f)
                 }
             }
@@ -291,7 +297,7 @@ fun SalesMapContent(
         uiSettings = uiSettings,
         properties = properties
     ) {
-        SaleStore.sales.forEach { sale ->
+        sales.forEach { sale ->
             Marker(
                 state = rememberMarkerState(position = LatLng(sale.lat, sale.lng)),
                 title = sale.type,

@@ -43,20 +43,23 @@ fun MySalesScreen(
     onAddSale: () -> Unit
 ){
     //place holders
-    var mySales by remember { mutableStateOf(SaleStore.sales.take(2)) }
-//    var isLoading by remember { mutableStateOf(true) }
-//    val scope = rememberCoroutineScope()
+    //var mySales by remember { mutableStateOf(SaleStore.sales.take(2)) }
+    var mySales by remember { mutableStateOf<List<Sale>>(emptyList()) }
+
+
+    var isLoading by remember { mutableStateOf(true) }
+    val scope = rememberCoroutineScope()
 
     // Load user's sales when screen opens
-//    LaunchedEffect(Unit) {
-//        scope.launch {
-//            val result = SaleRepository.getUserSales()
-//            result.onSuccess { sales ->
-//                mySales = sales
-//            }
-//            isLoading = false
-//        }
-//    }
+    LaunchedEffect(Unit) {
+        scope.launch {
+            val result = SaleRepository.getUserSales()
+            result.onSuccess { sales ->
+                mySales = sales
+            }
+            isLoading = false
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -77,25 +80,25 @@ fun MySalesScreen(
         },
         containerColor = colorResource(id = com.cs407.saleselector.R.color.light_blue)
     ){ paddingValues ->
-        //       if (isLoading) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-
-        }
-        //      } else {
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            items(mySales) { sale: Sale ->
-                SaleCard(sale)
+        if (isLoading) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                Text("Loading...", color = colorResource(id = com.cs407.saleselector.R.color.white))
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                items(mySales) { sale: Sale ->
+                    SaleCard(sale)
+                }
             }
         }
-        //  }
     }
 }
