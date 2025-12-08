@@ -38,8 +38,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -61,11 +63,13 @@ import com.cs407.saleselector.ui.model.SaleStore
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerComposable
+import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberMarkerState
 import kotlinx.coroutines.launch
@@ -82,18 +86,34 @@ fun SalesHomeScreen(
     var refreshTrigger by remember { mutableStateOf(0) }
     val scope = rememberCoroutineScope()
 
-    LaunchedEffect(refreshTrigger) {
-        scope.launch {
-            val result = SaleRepository.getAllSales()
-            result.onSuccess { sales ->
-                allSales = sales
+
+    DisposableEffect(Unit) {
+        val db = FirebaseFirestore.getInstance()
+
+        val listener = db.collection("sales")
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    android.util.Log.e("SalesHome", "Listen failed", error)
+                    return@addSnapshotListener
+                }
+
+                if (snapshot != null) {
+                    allSales = snapshot.documents.mapNotNull { doc ->
+                        try {
+                            doc.toObject(Sale::class.java)?.copy(id = doc.id)
+                        } catch (e: Exception) {
+                            null
+                        }
+                    }
+                    android.util.Log.d("SalesHome", "Real-time update: ${allSales.size} sales")
+                }
             }
+
+        onDispose {
+            listener.remove()
         }
     }
 
-    fun refreshSales() {
-        refreshTrigger++
-    }
 
 
     var hasLocationPermission by remember { mutableStateOf(false) }
@@ -298,12 +318,20 @@ fun SalesMapContent(
         properties = properties
     ) {
         sales.forEach { sale ->
-            Marker(
-                state = rememberMarkerState(position = LatLng(sale.lat, sale.lng)),
-                title = sale.type,
-                snippet = sale.host
-            )
+            key(sale.id) {
+                val markerState = remember {
+                    MarkerState(position = LatLng(sale.lat, sale.lng))
+                }
+
+                Marker(
+                    state = markerState,
+                    title = sale.type,
+                    snippet = sale.host
+                )
+            }
         }
+
+
 
     }
 }

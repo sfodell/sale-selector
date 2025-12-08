@@ -42,23 +42,28 @@ fun MySalesScreen(
     onBack: () -> Unit,
     onAddSale: () -> Unit
 ){
-    //place holders
-    //var mySales by remember { mutableStateOf(SaleStore.sales.take(2)) }
+
     var mySales by remember { mutableStateOf<List<Sale>>(emptyList()) }
 
-
     var isLoading by remember { mutableStateOf(true) }
+    var isDeleting by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
-    // Load user's sales when screen opens
-    LaunchedEffect(Unit) {
+    // Function to load sales
+    fun loadSales() {
         scope.launch {
+            isLoading = true
             val result = SaleRepository.getUserSales()
             result.onSuccess { sales ->
                 mySales = sales
             }
             isLoading = false
         }
+    }
+
+    // Load user's sales when screen opens
+    LaunchedEffect(Unit) {
+        loadSales()
     }
 
     Scaffold(
@@ -96,7 +101,20 @@ fun MySalesScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 items(mySales) { sale: Sale ->
-                    SaleCard(sale)
+                    SaleCard(
+                        sale = sale,
+                        onDelete = { saleId ->
+                            scope.launch {
+                                isDeleting = true
+                                val result = SaleRepository.deleteSale(saleId)
+                                result.onSuccess {
+                                    loadSales()
+                                }.onFailure { e ->
+                                    isDeleting = false
+                                }
+                            }
+                        }
+                    )
                 }
             }
         }
