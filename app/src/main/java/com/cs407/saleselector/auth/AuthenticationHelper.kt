@@ -6,6 +6,7 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
 import com.google.firebase.auth.userProfileChangeRequest
+import com.google.firebase.firestore.FirebaseFirestore
 
 
 // ============================================
@@ -111,28 +112,46 @@ fun signIn(
 
 /**
  * Create new Firebase account with email and password
+ * UPDATED: Creates a Firestore document for the user so they can be searched.
  */
 fun createAccount(
     email: String,
     password: String,
     onResult: (success: Boolean, message: String?, uid: String?) -> Unit
-    //any other callback function or parameters if you want
 ) {
     val auth: FirebaseAuth = FirebaseAuth.getInstance()
+    val db = FirebaseFirestore.getInstance() // Initialize Firestore
+
     auth.createUserWithEmailAndPassword(email, password)
         .addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 Log.d(TAG, "createUserWithEmail:success")
                 val user = auth.currentUser
-                // Logic to propagate success response
+
                 if (user != null) {
-                    onResult(true, null, user.uid)
+                    // Create User Document in Firestore
+                    val userMap = hashMapOf(
+                        "email" to email,
+                        "name" to email.substringBefore("@"), // Default name is part of email
+                        "salesVisited" to 0
+                    )
+
+                    db.collection("users").document(user.uid)
+                        .set(userMap)
+                        .addOnSuccessListener {
+                            // Only return success after database write succeeds
+                            onResult(true, null, user.uid)
+                        }
+                        .addOnFailureListener { e ->
+                            // Account created but DB failed (edge case)
+                            Log.w(TAG, "Error writing user document", e)
+                            onResult(true, "Account created but setup incomplete", user.uid)
+                        }
                 } else {
                     onResult(false, "Unknown error: User is null", null)
                 }
             } else {
                 Log.w(TAG, "createUserWithEmail:failure", task.exception)
-                // error in creation of account
                 onResult(false, task.exception?.message ?: "Account creation failed", null)
             }
         }
