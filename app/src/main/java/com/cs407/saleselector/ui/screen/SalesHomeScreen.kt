@@ -56,6 +56,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.cs407.saleselector.R
+import com.cs407.saleselector.data.FriendsRepository
 import com.cs407.saleselector.data.SaleRepository
 import com.cs407.saleselector.ui.components.SaleCard
 import com.cs407.saleselector.ui.model.Sale
@@ -159,7 +160,9 @@ fun SalesHomeScreen(
                         Text(stringResource(R.string.btn_my_sales), color = colorResource(id = com.cs407.saleselector.R.color.dark_blue))
                     }
                     Spacer(modifier = Modifier.height(8.dp))
-                    OutlinedButton(onClick = onOpenAccount, modifier = Modifier.fillMaxWidth(),  colors = ButtonDefaults.outlinedButtonColors(containerColor = colorResource(id = com.cs407.saleselector.R.color.white), )) {
+                    OutlinedButton(onClick = onOpenAccount, modifier = Modifier.fillMaxWidth(),  colors = ButtonDefaults.outlinedButtonColors(
+                        containerColor = colorResource(id = com.cs407.saleselector.R.color.white)
+                    )) {
                         Text(stringResource(R.string.btn_account), color = colorResource(id = com.cs407.saleselector.R.color.dark_blue))
                     }
                 }
@@ -172,14 +175,14 @@ fun SalesHomeScreen(
                     .fillMaxSize()
                     .padding(paddingValues)
             ) {
-                // Map content takes up the whole screen
+                //Map content takes up the whole screen
                 SalesMapContent(
                     cameraPositionState = cameraPositionState,
                     hasLocationPermission = hasLocationPermission,
                     sales = allSales
                 )
 
-                // FABs and other UI elements are layered on top of the map
+                //UI elements are layered on top of the map
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
@@ -195,12 +198,12 @@ fun SalesHomeScreen(
                         Icon(Icons.Default.Menu, contentDescription = stringResource(R.string.btn_friends_list))
                     }
 
-                    // Bottom content alignment depends on orientation
+                    //Bottom content alignment depends on orientation
                     val configuration = LocalConfiguration.current
                     val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
                     if (isLandscape) {
-                        // In landscape, group buttons on the right
+                        //In landscape, group buttons on the right
                         Column(horizontalAlignment = Alignment.End) {
                             Button(onClick = { showSheet = true }, modifier = Modifier.fillMaxWidth(0.4f),
                                 colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = com.cs407.saleselector.R.color.light_blue))
@@ -218,7 +221,7 @@ fun SalesHomeScreen(
                             }
                         }
                     } else {
-                        // In portrait, stack buttons at the bottom
+                        //In portrait, stack buttons at the bottom
                         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
                             Button(onClick = { showSheet = true }, modifier = Modifier.fillMaxWidth(0.6f), colors = ButtonDefaults.buttonColors(
                                 containerColor = colorResource(id = com.cs407.saleselector.R.color.light_blue)

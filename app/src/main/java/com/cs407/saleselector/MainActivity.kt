@@ -10,12 +10,17 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.cs407.saleselector.data.FriendsRepository
 import com.cs407.saleselector.ui.model.FriendsStore
 import com.cs407.saleselector.ui.screen.AccountScreen
 import com.cs407.saleselector.ui.screen.AddSaleScreen
@@ -36,6 +41,25 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             SaleSelectorTheme {
+                val lifecycleOwner = LocalLifecycleOwner.current
+                DisposableEffect(lifecycleOwner) {
+                    val observer = LifecycleEventObserver { _, event ->
+                        if (event == Lifecycle.Event.ON_RESUME) {
+                            //If foreground, active
+                            FriendsRepository.setMyStatus(true)
+                        } else if (event == Lifecycle.Event.ON_PAUSE) {
+                            //If background, inactive
+                            FriendsRepository.setMyStatus(false)
+                        }
+                    }
+                    lifecycleOwner.lifecycle.addObserver(observer)
+
+                    onDispose {
+                        lifecycleOwner.lifecycle.removeObserver(observer)
+                        //Ensure we go offline if the component is destroyed
+                        FriendsRepository.setMyStatus(false)
+                    }
+                }
                 Surface(
                     color = Color.Transparent
                 ) {
