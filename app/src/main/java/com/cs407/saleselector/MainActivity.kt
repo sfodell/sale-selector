@@ -10,17 +10,14 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.cs407.saleselector.data.FriendsRepository
+import androidx.navigation.navArgument
 import com.cs407.saleselector.ui.model.FriendsStore
 import com.cs407.saleselector.ui.screen.AccountScreen
 import com.cs407.saleselector.ui.screen.AddSaleScreen
@@ -41,25 +38,6 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             SaleSelectorTheme {
-                val lifecycleOwner = LocalLifecycleOwner.current
-                DisposableEffect(lifecycleOwner) {
-                    val observer = LifecycleEventObserver { _, event ->
-                        if (event == Lifecycle.Event.ON_RESUME) {
-                            //If foreground, active
-                            FriendsRepository.setMyStatus(true)
-                        } else if (event == Lifecycle.Event.ON_PAUSE) {
-                            //If background, inactive
-                            FriendsRepository.setMyStatus(false)
-                        }
-                    }
-                    lifecycleOwner.lifecycle.addObserver(observer)
-
-                    onDispose {
-                        lifecycleOwner.lifecycle.removeObserver(observer)
-                        //Ensure we go offline if the component is destroyed
-                        FriendsRepository.setMyStatus(false)
-                    }
-                }
                 Surface(
                     color = Color.Transparent
                 ) {
@@ -91,24 +69,43 @@ fun AppNavigation() {
                 onToLogin = { nav.popBackStack() }
             )
         }
-        composable("home") {
+
+        // Updated home route to accept optional lat/long arguments
+        composable(
+            "home?lat={lat}&lng={lng}",
+            arguments = listOf(
+                navArgument("lat") { type = NavType.FloatType; defaultValue = 0f },
+                navArgument("lng") { type = NavType.FloatType; defaultValue = 0f }
+            )
+        ) { backStackEntry ->
+            val lat = backStackEntry.arguments?.getFloat("lat") ?: 0f
+            val lng = backStackEntry.arguments?.getFloat("lng") ?: 0f
+
             SalesHomeScreen(
                 onOpenMyRoute = { nav.navigate("my_route") },
                 onOpenFriends = { nav.navigate("friends") },
                 onOpenMySales = { nav.navigate("my_sales") },
-                onOpenAccount = { nav.navigate("account") }
+                onOpenAccount = { nav.navigate("account") },
+                focusLat = lat.toDouble(),
+                focusLng = lng.toDouble()
             )
         }
+
         composable("my_route") {
             MyRouteScreen(
                 onBack = { nav.popBackStack() }
             )
         }
-        composable("friends") {
-            FriendsScreen(
-                onBack = { nav.popBackStack() }
-            )
+        composable("friends") {            FriendsScreen(
+            onBack = { nav.popBackStack() },
+            onGoToSale = { sale ->
+                nav.navigate("home?lat=${sale.lat}&lng=${sale.lng}") {
+                    popUpTo("home") { inclusive = true }
+                }
+            }
+        )
         }
+
         composable("my_sales") {
             MySalesScreen(
                 onBack = { nav.popBackStack() },
@@ -133,4 +130,3 @@ fun AppNavigation() {
         }
     }
 }
-
