@@ -3,9 +3,6 @@ package com.cs407.saleselector.data
 import com.cs407.saleselector.ui.model.Sale
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 
 object SaleRepository {
@@ -29,7 +26,15 @@ object SaleRepository {
     suspend fun getUserSales(): Result<List<Sale>> {
         return try {
             val userId = auth.currentUser?.uid ?: return Result.failure(Exception("Not logged in"))
+            getSalesByUserId(userId)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 
+    // Get sales for a SPECIFIC user (e.g. a friend)
+    suspend fun getSalesByUserId(userId: String): Result<List<Sale>> {
+        return try {
             val snapshot = db.collection("sales")
                 .whereEqualTo("userId", userId)
                 .get()
@@ -59,7 +64,6 @@ object SaleRepository {
             Result.failure(e)
         }
     }
-
 
     // Delete a sale
     suspend fun deleteSale(saleId: String): Result<Unit> {
