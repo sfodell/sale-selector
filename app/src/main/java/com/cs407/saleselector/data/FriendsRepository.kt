@@ -11,7 +11,6 @@ object FriendsRepository {
     private val db = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
 
-
     //search
     suspend fun searchUserByEmail(email: String): FriendStatus? {
         return try {
@@ -34,8 +33,8 @@ object FriendsRepository {
                 FriendStatus(
                     userID = doc.id,
                     name = safeName,
-                    active = doc.getBoolean("active") ?: false,
-                    salesVisted = (doc.getLong("salesVisited") ?: 0).toInt(),
+                    active = false,
+                    // salesVisited removed
                     status = "none"
                 )
             } else {
@@ -60,12 +59,12 @@ object FriendsRepository {
         }
 
         try {
-           //add to users list
+            //add to users list
             val myFriendEntry = FriendStatus(
                 userID = targetUser.userID,
                 name = targetUser.name,
                 active = false,
-                salesVisted = targetUser.salesVisted,
+                // salesVisited removed
                 status = "pending_sent"
             )
 
@@ -78,7 +77,7 @@ object FriendsRepository {
                 userID = currentUserId,
                 name = currentUserName,
                 active = false,
-                salesVisted = 0,
+                // salesVisited removed
                 status = "pending_received"
             )
             db.collection("users").document(targetUser.userID)
@@ -162,11 +161,9 @@ object FriendsRepository {
         }
     }
 
-    //live listener
+    //live listener for requests
     fun addRequestsListener(onUpdate: (List<FriendStatus>) -> Unit) {
         val currentUserId = auth.currentUser?.uid ?: return
-
-        Log.d("FriendsRepo", "Attaching requests listener for $currentUserId")
 
         db.collection("users").document(currentUserId)
             .collection("friends")
@@ -178,40 +175,18 @@ object FriendsRepository {
                 }
 
                 if (snapshot != null && !snapshot.isEmpty) {
-                    Log.d("FriendsRepo", "Found ${snapshot.documents.size} requests")
                     val requests = snapshot.documents.mapNotNull { doc ->
-                        // Force the userID to match the document ID to prevent data mismatch
                         val obj = doc.toObject(FriendStatus::class.java)
                         obj?.copy(userID = doc.id)
                     }
                     onUpdate(requests)
                 } else {
-                    Log.d("FriendsRepo", "No requests found")
                     onUpdate(emptyList())
                 }
             }
     }
 
-    //status WIP
-    fun setMyStatus(isOnline: Boolean) {
-        val currentUserId = auth.currentUser?.uid ?: return
-        val userEmail = auth.currentUser?.email ?: ""
-        val userName = auth.currentUser?.displayName.let {
-            if (it.isNullOrBlank()) userEmail.substringBefore("@") else it
-        }
-
-        val statusMap = mapOf(
-            "active" to isOnline,
-            "email" to userEmail,
-            "name" to userName
-        )
-
-        db.collection("users").document(currentUserId)
-            .set(statusMap, SetOptions.merge())
-            .addOnFailureListener { e -> Log.e("FriendsRepo", "Error setting status", e) }
-    }
-
-    //live friends listener
+    // Simple listener for friends list
     fun addFriendsListener(onUpdate: (List<FriendStatus>) -> Unit) {
         val currentUserId = auth.currentUser?.uid ?: return
 
@@ -219,45 +194,16 @@ object FriendsRepository {
             .collection("friends")
             .whereEqualTo("status", "accepted")
             .addSnapshotListener { snapshot, e ->
-                if (e != null) return@addSnapshotListener
+                if (e != null) {
+                    Log.e("FriendsRepo", "Error listening to friends list", e)
+                    return@addSnapshotListener
+                }
 
-                val subcollectionFriends = snapshot?.documents?.mapNotNull { doc ->
-                    doc.toObject(FriendStatus::class.java)?.copy(userID = doc.id)
+                val friends = snapshot?.documents?.mapNotNull { doc ->
+                    doc.toObject(FriendStatus::class.java)?.copy(userID = doc.id, active = false)
                 } ?: emptyList()
 
-                val friendIds = subcollectionFriends.map { it.userID }
-
-                if (friendIds.isNotEmpty()) {
-                    db.collection("users")
-                        .whereIn(com.google.firebase.firestore.FieldPath.documentId(), friendIds)
-                        .addSnapshotListener { userSnap, userErr ->
-                            if (userErr != null) {
-                                // Fallback to basic list if root query fails
-                                onUpdate(subcollectionFriends)
-                                return@addSnapshotListener
-                            }
-
-                            val rootUsersMap = userSnap?.documents?.associate { doc ->
-                                doc.id to doc.toObject(FriendStatus::class.java)
-                            } ?: emptyMap()
-
-                            val mergedList = subcollectionFriends.map { basicFriend ->
-                                val liveData = rootUsersMap[basicFriend.userID]
-                                if (liveData != null) {
-                                    // Merge live status with basic info
-                                    basicFriend.copy(
-                                        active = liveData.active,
-                                        salesVisted = liveData.salesVisted
-                                    )
-                                } else {
-                                    basicFriend
-                                }
-                            }
-                            onUpdate(mergedList)
-                        }
-                } else {
-                    onUpdate(emptyList())
-                }
+                onUpdate(friends)
             }
     }
 }

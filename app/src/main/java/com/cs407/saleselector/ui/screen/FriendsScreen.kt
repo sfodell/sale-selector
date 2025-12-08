@@ -5,7 +5,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,11 +21,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -34,7 +36,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -50,17 +54,21 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import com.cs407.saleselector.R
 import com.cs407.saleselector.data.FriendsRepository
+import com.cs407.saleselector.data.SaleRepository
 import com.cs407.saleselector.ui.components.AddFriendDialog
-import com.cs407.saleselector.ui.components.FriendDetailDialog
+import com.cs407.saleselector.ui.components.SaleCard
 import com.cs407.saleselector.ui.model.FriendStatus
+import com.cs407.saleselector.ui.model.Sale
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FriendsScreen(
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onGoToSale: (Sale) -> Unit // New callback for navigation
 ) {
     val scope = rememberCoroutineScope()
 
@@ -69,14 +77,9 @@ fun FriendsScreen(
     var requestsList by remember { mutableStateOf<List<FriendStatus>>(emptyList()) }
 
     LaunchedEffect(Unit) {
-        //ensure user document exists so requests can be received
-
-        //listen for friends list updates
         FriendsRepository.addFriendsListener { updatedList ->
             friendsList = updatedList
         }
-
-        //listen for incoming requests (REAL-TIME)
         FriendsRepository.addRequestsListener { updatedRequests ->
             requestsList = updatedRequests
         }
@@ -89,8 +92,10 @@ fun FriendsScreen(
     var isAlreadyFriend by remember { mutableStateOf(false) }
     var isSearching by remember { mutableStateOf(false) }
 
-    //Detail States
+    //Detail & Sales States
     var selectedFriend by remember { mutableStateOf<FriendStatus?>(null) }
+    var selectedFriendSales by remember { mutableStateOf<List<Sale>>(emptyList()) }
+    var isLoadingSales by remember { mutableStateOf(false) }
     var showDetailDialog by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -169,10 +174,17 @@ fun FriendsScreen(
                 items(friendsList) { friend ->
                     FriendListItem(
                         name = friend.name,
-                        isActive = friend.active,
+                        isActive = false,
                         onClick = {
                             selectedFriend = friend
                             showDetailDialog = true
+                            // Fetch sales for this friend
+                            scope.launch {
+                                isLoadingSales = true
+                                val result = SaleRepository.getSalesByUserId(friend.userID)
+                                selectedFriendSales = result.getOrNull() ?: emptyList()
+                                isLoadingSales = false
+                            }
                         }
                     )
                 }
@@ -282,86 +294,127 @@ fun FriendsScreen(
             )
         }
 
+        // New Dialog that shows sales
         if (showDetailDialog && selectedFriend != null) {
-            FriendDetailDialog(
-                friend = selectedFriend,
-                isOpen = showDetailDialog,
+            FriendSalesDialog(
+                friend = selectedFriend!!,
+                sales = selectedFriendSales,
+                isLoading = isLoadingSales,
                 onDismiss = { showDetailDialog = false },
-                onRemoveFriend = { friendToRemove ->
+                onRemove = {
                     scope.launch {
-                        FriendsRepository.removeFriend(friendToRemove.userID)
+                        FriendsRepository.removeFriend(selectedFriend!!.userID)
                         showDetailDialog = false
                     }
+                },
+                onGoToSale = { sale ->
+                    showDetailDialog = false
+                    onGoToSale(sale)
                 }
             )
         }
     }
 }
 
-//helpers
+// Replaces the old FriendDetailDialog with one that shows sales
 @Composable
-fun FriendRequestItem(
-    name: String,
-    onAccept: () -> Unit,
-    onDecline: () -> Unit
+fun FriendSalesDialog(
+    friend: FriendStatus,
+    sales: List<Sale>,
+    isLoading: Boolean,
+    onDismiss: () -> Unit,
+    onRemove: () -> Unit,
+    onGoToSale: (Sale) -> Unit
 ) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        colors = CardDefaults.cardColors(containerColor = colorResource(id = R.color.white)),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-    ) {
-        Row(
+    Dialog(onDismissRequest = onDismiss) {
+        Surface(
+            shape = RoundedCornerShape(16.dp),
+            color = colorResource(id = R.color.white),
             modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+                .fillMaxWidth()
+                .height(550.dp)
         ) {
-            Column(modifier = Modifier.weight(1f)) {
+            Column(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxSize()
+            ) {
+                // Header
                 Text(
-                    text = if (name.isBlank()) "Unknown User" else name,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = Color.Black,
-                    fontWeight = FontWeight.Bold
+                    text = friend.name,
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = colorResource(id = R.color.dark_blue),
+                    modifier = Modifier.padding(bottom = 16.dp)
                 )
+
                 Text(
-                    text = "Sent a friend request",
-                    style = MaterialTheme.typography.bodySmall,
+                    text = "Active Sales",
+                    style = MaterialTheme.typography.titleMedium,
                     color = Color.Gray
                 )
-            }
 
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                //Decline Button
-                Button(
-                    onClick = onDecline,
-                    colors = ButtonDefaults.buttonColors(containerColor = colorResource(R.color.delete_red)),
-                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
-                    modifier = Modifier.height(36.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Close,
-                        contentDescription = "Decline",
-                        tint = Color.White,
-                        modifier = Modifier.size(16.dp)
-                    )
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Sales List
+                Box(modifier = Modifier.weight(1f)) {
+                    if (isLoading) {
+                        CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                    } else if (sales.isEmpty()) {
+                        // Polished Empty State
+                        Column(
+                            modifier = Modifier
+                                .align(Alignment.Center)
+                                .fillMaxWidth(),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.ShoppingCart,
+                                contentDescription = null,
+                                tint = Color.LightGray,
+                                modifier = Modifier.size(64.dp)
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text(
+                                text = "No active sales",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = Color.Gray
+                            )
+                            Text(
+                                text = "Check back later!",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.Gray.copy(alpha = 0.7f)
+                            )
+                        }
+                    } else {
+                        LazyColumn(
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            items(sales) { sale ->
+                                Box(modifier = Modifier.clickable { onGoToSale(sale) }) {
+                                    SaleCard(
+                                        sale = sale,
+                                        onDelete = null
+                                    )
+                                }
+                            }
+                        }
+                    }
                 }
 
-                //Accept Button
-                Button(
-                    onClick = onAccept,
-                    colors = ButtonDefaults.buttonColors(containerColor = colorResource(R.color.status_online)),
-                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
-                    modifier = Modifier.height(36.dp)
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Buttons
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Check,
-                        contentDescription = "Accept",
-                        tint = Color.White,
-                        modifier = Modifier.size(16.dp)
-                    )
+                    TextButton(onClick = onRemove) {
+                        Text("Remove Friend", color = Color.Red)
+                    }
+                    TextButton(onClick = onDismiss) {
+                        Text("Close", color = colorResource(id = R.color.dark_blue))
+                    }
                 }
             }
         }
@@ -379,32 +432,96 @@ fun FriendListItem(
             .fillMaxWidth()
             .padding(vertical = 4.dp)
             .clickable(onClick = onClick),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White)
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White.copy(alpha = 0.1f)
+        ),
+        shape = RoundedCornerShape(12.dp)
     ) {
         Row(
             modifier = Modifier
                 .padding(16.dp)
                 .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = if (name.isBlank()) "Unknown" else name,
-                style = MaterialTheme.typography.bodyLarge,
-                color = Color.Black,
-                fontWeight = FontWeight.Medium
-            )
-
-            //Status Dot WI
+            // Circular Avatar with Initial
             Box(
                 modifier = Modifier
-                    .size(12.dp)
-                    .background(
-                        color = if (isActive) colorResource(R.color.status_online) else colorResource(R.color.status_offline),
-                        shape = CircleShape
-                    )
+                    .size(40.dp)
+                    .background(colorResource(id = R.color.white), CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = name.firstOrNull()?.toString()?.uppercase() ?: "?",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = colorResource(id = R.color.dark_blue),
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            // Friend Name
+            Text(
+                text = name,
+                style = MaterialTheme.typography.titleMedium,
+                color = colorResource(id = R.color.white),
+                modifier = Modifier.weight(1f)
             )
+        }
+    }
+}
+
+@Composable
+fun FriendRequestItem(
+    name: String,
+    onAccept: () -> Unit,
+    onDecline: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White.copy(alpha = 0.1f)
+        ),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .padding(12.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = name,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = colorResource(id = R.color.white)
+                )
+                Text(
+                    text = "Wants to be friends",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = colorResource(id = R.color.white).copy(alpha = 0.7f)
+                )
+            }
+
+            // Action Buttons
+            Row {
+                IconButton(onClick = onAccept) {
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = "Accept",
+                        tint = Color.Green
+                    )
+                }
+                IconButton(onClick = onDecline) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Decline",
+                        tint = Color.Red
+                    )
+                }
+            }
         }
     }
 }
