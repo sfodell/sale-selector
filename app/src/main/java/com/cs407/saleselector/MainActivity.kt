@@ -58,7 +58,7 @@ fun AppNavigation() {
                         launchSingleTop = true
                     }
                 },
-                onToCreate = { nav.navigate("create") },
+                //onToCreate = { nav.navigate("create") },
             )
         }
         composable("create") {

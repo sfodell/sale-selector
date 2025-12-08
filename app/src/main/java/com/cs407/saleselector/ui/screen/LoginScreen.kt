@@ -2,12 +2,15 @@ package com.cs407.saleselector.ui.screen
 
 import android.R
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -33,12 +36,14 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.cs407.saleselector.auth.EmailResult
 import com.cs407.saleselector.auth.PasswordResult
 import com.cs407.saleselector.auth.signIn
@@ -112,7 +117,6 @@ fun LogInSignUpButton(
 @Composable
 fun LoginScreen(
     onLogin: () -> Unit,
-    onToCreate: () -> Unit,
 ){
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -122,7 +126,7 @@ fun LoginScreen(
     Scaffold (
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("Log In", style = MaterialTheme.typography.displayLarge,
+                title = { Text("SaleSelector", style = MaterialTheme.typography.displayLarge,
                     color = colorResource(id = com.cs407.saleselector.R.color.white))},
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = colorResource(id = com.cs407.saleselector.R.color.light_blue)),
                 modifier = Modifier.fillMaxWidth()
@@ -138,6 +142,17 @@ fun LoginScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ){
+            Image(
+                painter = painterResource(id = com.cs407.saleselector.R.drawable.logo),
+                contentDescription = "App Logo",
+                modifier = Modifier.size(175.dp)
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "Log In or Sign Up",
+                style = MaterialTheme.typography.displayLarge.copy(fontSize = 30.sp),
+                color = colorResource(id = com.cs407.saleselector.R.color.white)
+            )
             OutlinedTextField( // userEmail
                 value = email,
                 onValueChange = {email = it},
@@ -167,6 +182,8 @@ fun LoginScreen(
                     focusedTextColor = colorResource(id = com.cs407.saleselector.R.color.white),
                     unfocusedTextColor = colorResource(id = com.cs407.saleselector.R.color.white)
                 ))
+
+            Spacer(modifier = Modifier.height(8.dp))
             LogInSignUpButton(
                 email = email,
                 password = password,
@@ -225,17 +242,17 @@ fun LoginScreen(
                 }
             )
             ErrorText(error = error,)
-            TextButton(onClick = onToCreate) {
-                Text(text ="If you don't have an account, create one!",
-                    color = colorResource(id = com.cs407.saleselector.R.color.dark_blue))
-            }
-            Divider(color = colorResource(id = com.cs407.saleselector.R.color.dark_blue),)
-            TextButton(onClick = {
-                //implement in the future
-            }){
-                Text("Forgot Password?",
-                    color = colorResource(id = com.cs407.saleselector.R.color.dark_blue))
-            }
+//            TextButton(onClick = onToCreate) {
+//                Text(text ="If you don't have an account, create one!",
+//                    color = colorResource(id = com.cs407.saleselector.R.color.dark_blue))
+//            }
+//            Divider(color = colorResource(id = com.cs407.saleselector.R.color.dark_blue),)
+//            TextButton(onClick = {
+//                //implement in the future
+//            }){
+//                Text("Forgot Password?",
+//                    color = colorResource(id = com.cs407.saleselector.R.color.dark_blue))
+//            }
         }
     }
 }
