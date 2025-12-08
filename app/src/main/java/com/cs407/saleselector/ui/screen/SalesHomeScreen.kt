@@ -245,8 +245,7 @@ fun SalesHomeScreen(
                 LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     items(allSales) { sale ->
                         SaleCard(
-                            sale = sale,
-                            onDelete = {}
+                            sale = sale
                         )
                     }
                 }
