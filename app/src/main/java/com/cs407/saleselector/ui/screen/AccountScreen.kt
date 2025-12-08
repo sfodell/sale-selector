@@ -18,12 +18,19 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
+import kotlinx.coroutines.launch
+import com.cs407.saleselector.data.SaleRepository
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -32,6 +39,9 @@ fun AccountScreen(
     onBack: () -> Unit,
     onLogout: () -> Unit
 ){
+    var isDeleting by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -77,23 +87,35 @@ fun AccountScreen(
 
             Button(
                 onClick = {
-                    // Delete account
-                    val user = Firebase.auth.currentUser
-                    user?.delete()?.addOnCompleteListener { task ->
-                        if (task.isSuccessful) {
-                            // Account deleted successfully
-                            onLogout() // Navigate to login page
-                        } else {
+                    scope.launch {
+                        isDeleting = true
+                        val user = Firebase.auth.currentUser
+                        val userId = user?.uid
 
+                        if (userId != null) {
+                            val deleteSalesResult = SaleRepository.deleteAllUserSales(userId)
+
+                            deleteSalesResult.onSuccess {
+                                user.delete().addOnCompleteListener { task ->
+                                    if (task.isSuccessful) {
+                                        onLogout()
+                                    } else {
+                                        isDeleting = false
+                                    }
+                                }
+                            }.onFailure {
+                                isDeleting = false
+                            }
                         }
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),
+                enabled = !isDeleting,
                 colors = androidx.compose.material3.ButtonDefaults.buttonColors(
                     containerColor = Color.Red
                 )
             ) {
-                Text("Delete Account")
+                Text(if (isDeleting) "Deleting..." else "Delete Account")
             }
         }
     }

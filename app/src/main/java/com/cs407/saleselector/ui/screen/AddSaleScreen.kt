@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
+import com.cs407.saleselector.data.SaleRepository
 import com.cs407.saleselector.ui.model.Sale
 import com.cs407.saleselector.ui.model.SaleStore
 import kotlinx.coroutines.launch
@@ -146,10 +147,10 @@ fun AddSaleScreen(
 
                         val result = geocoder.getFromLocationName(fullAddress, 1)
 
-                        if (!result.isNullOrEmpty()) {
+                        val sale = if (!result.isNullOrEmpty()) {
                             val location = result[0]
 
-                            SaleStore.sales.add(
+                            //SaleStore.sales.add(
                                 Sale(
                                     city = city,
                                     type = type,
@@ -158,10 +159,10 @@ fun AddSaleScreen(
                                     lat = location.latitude,
                                     lng = location.longitude
                                 )
-                            )
+                            //)
                         } else {
                             // Fallback if geocoder fails
-                            SaleStore.sales.add(
+                            //SaleStore.sales.add(
                                 Sale(
                                     city = city,
                                     type = type,
@@ -170,18 +171,32 @@ fun AddSaleScreen(
                                     lat = 0.0,
                                     lng = 0.0
                                 )
-                            )
+                            //)
+                        }
+
+                        // Save to Firebase instead of SaleStore
+                        val saveResult = SaleRepository.addSale(sale)
+
+                        saveResult.onSuccess {
+                            onSave() // Navigate back on success
+                        }.onFailure { e ->
+                            error = "Failed to save: ${e.message}"
+                            isSaving = false
                         }
                     }
-
-                    onSave()
                 },
                 modifier = Modifier.fillMaxWidth(),
+                enabled = !isSaving,
                 colors = androidx.compose.material3.ButtonDefaults.buttonColors(
                     containerColor = colorResource(id = com.cs407.saleselector.R.color.white)
                 )
             ) {
-                Text("Save", color = colorResource(id = com.cs407.saleselector.R.color.dark_blue))
+                //Text("Save", color = colorResource(id = com.cs407.saleselector.R.color.dark_blue))
+
+                Text(
+                    if (isSaving) "Saving..." else "Save",
+                    color = colorResource(id = com.cs407.saleselector.R.color.dark_blue)
+                )
             }
 
         }

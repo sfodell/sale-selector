@@ -41,6 +41,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -63,11 +64,13 @@ import com.cs407.saleselector.ui.model.SaleStore
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerComposable
+import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberMarkerState
 import kotlinx.coroutines.launch
@@ -81,16 +84,37 @@ fun SalesHomeScreen(
     onOpenAccount: () -> Unit,
 ){
     var allSales by remember { mutableStateOf<List<Sale>>(emptyList()) }
+    var refreshTrigger by remember { mutableStateOf(0) }
     val scope = rememberCoroutineScope()
 
-    LaunchedEffect(Unit) {
-        scope.launch {
-            val result = SaleRepository.getAllSales()
-            result.onSuccess { sales ->
-                allSales = sales
+
+    DisposableEffect(Unit) {
+        val db = FirebaseFirestore.getInstance()
+
+        val listener = db.collection("sales")
+            .addSnapshotListener { snapshot, error ->
+                if (error != null) {
+                    android.util.Log.e("SalesHome", "Listen failed", error)
+                    return@addSnapshotListener
+                }
+
+                if (snapshot != null) {
+                    allSales = snapshot.documents.mapNotNull { doc ->
+                        try {
+                            doc.toObject(Sale::class.java)?.copy(id = doc.id)
+                        } catch (e: Exception) {
+                            null
+                        }
+                    }
+                    android.util.Log.d("SalesHome", "Real-time update: ${allSales.size} sales")
+                }
             }
+
+        onDispose {
+            listener.remove()
         }
     }
+
 
 
     var hasLocationPermission by remember { mutableStateOf(false) }
@@ -154,7 +178,8 @@ fun SalesHomeScreen(
                 //Map content takes up the whole screen
                 SalesMapContent(
                     cameraPositionState = cameraPositionState,
-                    hasLocationPermission = hasLocationPermission
+                    hasLocationPermission = hasLocationPermission,
+                    sales = allSales
                 )
 
                 //UI elements are layered on top of the map
@@ -225,7 +250,7 @@ fun SalesHomeScreen(
                 Text(stringResource(R.string.sheet_nearby_title), style = MaterialTheme.typography.titleLarge)
                 Spacer(Modifier.height(8.dp))
                 LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    items(SaleStore.sales) {sale -> SaleCard(sale) }
+                    items(allSales) {sale -> SaleCard(sale) }
                 }
                 Spacer(Modifier.height(16.dp))
             }
@@ -237,7 +262,8 @@ fun SalesHomeScreen(
 @Composable
 fun SalesMapContent(
     cameraPositionState: com.google.maps.android.compose.CameraPositionState,
-    hasLocationPermission: Boolean
+    hasLocationPermission: Boolean,
+    sales: List<Sale>
 ) {
     val context = LocalContext.current
     val fusedLocationClient = remember {
@@ -273,7 +299,6 @@ fun SalesMapContent(
                     currentLocation = newLoc
                     markerState.position = newLoc
 
-                    // MOVE CAMERA LIKE IN CLIMARK
                     cameraPositionState.position = CameraPosition.fromLatLngZoom(newLoc, 15f)
                 }
             }
@@ -295,13 +320,21 @@ fun SalesMapContent(
         uiSettings = uiSettings,
         properties = properties
     ) {
-        SaleStore.sales.forEach { sale ->
-            Marker(
-                state = rememberMarkerState(position = LatLng(sale.lat, sale.lng)),
-                title = sale.type,
-                snippet = sale.host
-            )
+        sales.forEach { sale ->
+            key(sale.id) {
+                val markerState = remember {
+                    MarkerState(position = LatLng(sale.lat, sale.lng))
+                }
+
+                Marker(
+                    state = markerState,
+                    title = sale.type,
+                    snippet = sale.host
+                )
+            }
         }
+
+
 
     }
 }

@@ -70,9 +70,6 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-
-//testing commit project
-
 @Composable
 fun AppNavigation() {
     val nav = rememberNavController()
@@ -127,7 +124,11 @@ fun AppNavigation() {
         composable("account") {
             AccountScreen(
                 onBack = { nav.popBackStack() },
-                onLogout = {nav.navigate("login")}
+                onLogout = {
+                    nav.navigate("login") {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
             )
         }
     }
