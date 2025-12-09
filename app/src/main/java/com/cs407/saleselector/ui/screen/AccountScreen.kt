@@ -31,6 +31,7 @@ import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import kotlinx.coroutines.launch
 import com.cs407.saleselector.data.SaleRepository
+import kotlinx.coroutines.tasks.await
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -40,6 +41,7 @@ fun AccountScreen(
     onLogout: () -> Unit
 ){
     var isDeleting by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
     val scope = rememberCoroutineScope()
 
     Scaffold(
@@ -89,23 +91,38 @@ fun AccountScreen(
                 onClick = {
                     scope.launch {
                         isDeleting = true
-                        val user = Firebase.auth.currentUser
-                        val userId = user?.uid
+                        errorMessage = null
 
-                        if (userId != null) {
-                            val deleteSalesResult = SaleRepository.deleteAllUserSales(userId)
+                        try {
+                            val user = Firebase.auth.currentUser
+                            val userId = user?.uid
 
-                            deleteSalesResult.onSuccess {
-                                user.delete().addOnCompleteListener { task ->
-                                    if (task.isSuccessful) {
+                            if (userId != null && user != null) {
+                                // Delete all user sales first
+                                val deleteSalesResult = SaleRepository.deleteAllUserSales(userId)
+
+                                deleteSalesResult.onSuccess {
+                                    // Delete the user account using await to properly handle the async operation
+                                    try {
+                                        user.delete().await()
+                                        // Sign out and navigate to login
+                                        Firebase.auth.signOut()
                                         onLogout()
-                                    } else {
+                                    } catch (e: Exception) {
+                                        errorMessage = "Failed to delete account: ${e.message}"
                                         isDeleting = false
                                     }
+                                }.onFailure { exception ->
+                                    errorMessage = "Failed to delete sales: ${exception.message}"
+                                    isDeleting = false
                                 }
-                            }.onFailure {
+                            } else {
+                                errorMessage = "No user logged in"
                                 isDeleting = false
                             }
+                        } catch (e: Exception) {
+                            errorMessage = "Error: ${e.message}"
+                            isDeleting = false
                         }
                     }
                 },
