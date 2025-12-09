@@ -120,7 +120,7 @@ fun createAccount(
     onResult: (success: Boolean, message: String?, uid: String?) -> Unit
 ) {
     val auth: FirebaseAuth = FirebaseAuth.getInstance()
-    val db = FirebaseFirestore.getInstance() // Initialize Firestore
+    val db = FirebaseFirestore.getInstance()
 
     auth.createUserWithEmailAndPassword(email, password)
         .addOnCompleteListener { task ->
@@ -132,18 +132,41 @@ fun createAccount(
                     // Create User Document in Firestore
                     val userMap = hashMapOf(
                         "email" to email,
-                        "name" to email.substringBefore("@"), // Default name is part of email
+                        "name" to email.substringBefore("@"),
                         "salesVisited" to 0
                     )
 
                     db.collection("users").document(user.uid)
                         .set(userMap)
                         .addOnSuccessListener {
-                            // Only return success after database write succeeds
-                            onResult(true, null, user.uid)
+                            // Initialize friends subcollection with a placeholder
+                            db.collection("users").document(user.uid)
+                                .collection("friends")
+                                .document("_init")
+                                .set(mapOf("initialized" to true))
+                                .addOnSuccessListener {
+                                    // Delete the placeholder immediately
+                                    db.collection("users").document(user.uid)
+                                        .collection("friends")
+                                        .document("_init")
+                                        .delete()
+                                        .addOnSuccessListener {
+                                            Log.d(TAG, "Friends collection initialized")
+                                            onResult(true, null, user.uid)
+                                        }
+                                        .addOnFailureListener { e ->
+                                            // Friends collection created, just couldn't delete placeholder
+                                            Log.w(TAG, "Could not delete placeholder", e)
+                                            onResult(true, null, user.uid)
+                                        }
+                                }
+                                .addOnFailureListener { e ->
+                                    Log.w(TAG, "Error initializing friends collection", e)
+                                    // Still return success - friends can be added later
+                                    onResult(true, "Account created", user.uid)
+                                }
                         }
                         .addOnFailureListener { e ->
-                            // Account created but DB failed (edge case)
                             Log.w(TAG, "Error writing user document", e)
                             onResult(true, "Account created but setup incomplete", user.uid)
                         }
