@@ -10,6 +10,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
@@ -19,6 +20,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.cs407.saleselector.ui.model.FriendsStore
+import com.cs407.saleselector.ui.model.MapRouteViewModel
 import com.cs407.saleselector.ui.screen.AccountScreen
 import com.cs407.saleselector.ui.screen.AddSaleScreen
 import com.cs407.saleselector.ui.screen.CreateAccountScreen
@@ -51,6 +53,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun AppNavigation() {
     val nav = rememberNavController()
+    val mapRouteViewModel = remember { MapRouteViewModel() }
     NavHost(navController = nav, startDestination = "login") {
         composable("login") {
             LoginScreen(
@@ -93,7 +96,8 @@ fun AppNavigation() {
 
         composable("my_route") {
             MyRouteScreen(
-                onBack = { nav.popBackStack() }
+                onBack = { nav.popBackStack() },
+                viewModel = mapRouteViewModel
             )
         }
         composable("friends") {            FriendsScreen(
